@@ -6,23 +6,26 @@ import { getBrowseFilters, getPapers } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
 
+type BrowseSearchParams = {
+  q?: string;
+  course?: string;
+  semester?: string;
+  subject?: string;
+};
+
 export default async function BrowsePage({
   searchParams,
 }: {
-  searchParams: {
-    q?: string;
-    course?: string;
-    semester?: string;
-    subject?: string;
-  };
+  searchParams: Promise<BrowseSearchParams>;
 }) {
+  const resolvedSearchParams = await searchParams;
   const { courses, semesters, subjects } = await getBrowseFilters();
 
   const { papers, subjectMap, semesterMap } = await getPapers({
-    search: searchParams.q,
-    courseId: searchParams.course ? Number(searchParams.course) : undefined,
-    semesterId: searchParams.semester ? Number(searchParams.semester) : undefined,
-    subjectId: searchParams.subject ? Number(searchParams.subject) : undefined,
+    search: resolvedSearchParams.q,
+    courseId: resolvedSearchParams.course ? Number(resolvedSearchParams.course) : undefined,
+    semesterId: resolvedSearchParams.semester ? Number(resolvedSearchParams.semester) : undefined,
+    subjectId: resolvedSearchParams.subject ? Number(resolvedSearchParams.subject) : undefined,
   });
 
   return (

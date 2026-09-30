@@ -6,8 +6,13 @@ import { getPaperById } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
 
-export default async function PaperDetailsPage({ params }: { params: { id: string } }) {
-  const paperData = await getPaperById(params.id);
+export default async function PaperDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const paperData = await getPaperById(id);
 
   if (!paperData) {
     notFound();
