@@ -12,14 +12,24 @@ export type Paper = {
   semester_id: number;
 };
 
-export async function getHomeData() {
+type BrowseResult = {
+  papers: Paper[];
+  subjectMap: Map<number, Subject>;
+  semesterMap: Map<number, Semester>;
+};
+
+export async function getHomeData(): Promise<{
+  stats: { papers: number; courses: number; subjects: number };
+  featuredSubjects: Subject[];
+  recentPapers: Paper[];
+}> {
   const supabase = getSupabaseClient();
 
   if (!supabase) {
     return {
       stats: { papers: 0, courses: 0, subjects: 0 },
-      featuredSubjects: [] as Subject[],
-      recentPapers: [] as Paper[],
+      featuredSubjects: [],
+      recentPapers: [],
     };
   }
 
@@ -42,19 +52,23 @@ export async function getHomeData() {
       courses: coursesCount.count ?? 0,
       subjects: subjectsCount.count ?? 0,
     },
-    featuredSubjects: featuredSubjects.data ?? [],
-    recentPapers: recentPapers.data ?? [],
+    featuredSubjects: (featuredSubjects.data ?? []) as Subject[],
+    recentPapers: (recentPapers.data ?? []) as Paper[],
   };
 }
 
-export async function getBrowseFilters() {
+export async function getBrowseFilters(): Promise<{
+  courses: Course[];
+  semesters: Semester[];
+  subjects: Subject[];
+}> {
   const supabase = getSupabaseClient();
 
   if (!supabase) {
     return {
-      courses: [] as Course[],
-      semesters: [] as Semester[],
-      subjects: [] as Subject[],
+      courses: [],
+      semesters: [],
+      subjects: [],
     };
   }
 
@@ -65,9 +79,9 @@ export async function getBrowseFilters() {
   ]);
 
   return {
-    courses: courses.data ?? [],
-    semesters: semesters.data ?? [],
-    subjects: subjects.data ?? [],
+    courses: (courses.data ?? []) as Course[],
+    semesters: (semesters.data ?? []) as Semester[],
+    subjects: (subjects.data ?? []) as Subject[],
   };
 }
 
@@ -76,11 +90,15 @@ export async function getPapers(params: {
   courseId?: number;
   semesterId?: number;
   subjectId?: number;
-}) {
+}): Promise<BrowseResult> {
   const supabase = getSupabaseClient();
 
   if (!supabase) {
-    return { papers: [] as Paper[], subjectMap: new Map<number, Subject>(), semesterMap: new Map<number, Semester>() };
+    return {
+      papers: [],
+      subjectMap: new Map<number, Subject>(),
+      semesterMap: new Map<number, Semester>(),
+    };
   }
 
   let semesterIdsForCourse: number[] | undefined;
@@ -89,9 +107,13 @@ export async function getPapers(params: {
       .from("semester")
       .select("id")
       .eq("course_id", params.courseId);
-    semesterIdsForCourse = (data ?? []).map((item) => item.id);
+    semesterIdsForCourse = (data ?? []).map((item) => item.id as number);
     if (!semesterIdsForCourse.length) {
-      return { papers: [] as Paper[], subjectMap: new Map<number, Subject>(), semesterMap: new Map<number, Semester>() };
+      return {
+        papers: [],
+        subjectMap: new Map<number, Subject>(),
+        semesterMap: new Map<number, Semester>(),
+      };
     }
   }
 
@@ -105,10 +127,11 @@ export async function getPapers(params: {
   if (params.subjectId) query = query.eq("subject_id", params.subjectId);
   if (semesterIdsForCourse) query = query.in("semester_id", semesterIdsForCourse);
 
-  const { data: papers = [] } = await query;
+  const papersResult = await query;
+  const papers = (papersResult.data ?? []) as Paper[];
 
-  const subjectIds = [...new Set(papers.map((paper) => paper.subject_id))];
-  const semesterIds = [...new Set(papers.map((paper) => paper.semester_id))];
+  const subjectIds = Array.from(new Set(papers.map((paper) => paper.subject_id)));
+  const semesterIds = Array.from(new Set(papers.map((paper) => paper.semester_id)));
 
   const [subjectsResult, semestersResult] = await Promise.all([
     subjectIds.length
@@ -121,12 +144,21 @@ export async function getPapers(params: {
 
   return {
     papers,
-    subjectMap: new Map((subjectsResult.data ?? []).map((subject) => [subject.id, subject])),
-    semesterMap: new Map((semestersResult.data ?? []).map((semester) => [semester.id, semester])),
+    subjectMap: new Map(
+      ((subjectsResult.data ?? []) as Subject[]).map((subject) => [subject.id, subject]),
+    ),
+    semesterMap: new Map(
+      ((semestersResult.data ?? []) as Semester[]).map((semester) => [semester.id, semester]),
+    ),
   };
 }
 
-export async function getPaperById(id: string) {
+export async function getPaperById(id: string): Promise<{
+  paper: Paper;
+  subject: Subject | null;
+  semester: Semester | null;
+  course: Course | null;
+} | null> {
   const supabase = getSupabaseClient();
 
   if (!supabase) {
@@ -136,7 +168,7 @@ export async function getPaperById(id: string) {
   const { data: paper } = await supabase
     .from("papers")
     .select("id,title,year,pdf_url,subject_id,semester_id")
-    .eq("id", id)
+    .eq("id", Number(id))
     .single();
 
   if (!paper) return null;
@@ -154,8 +186,8 @@ export async function getPaperById(id: string) {
       .single(),
   ]);
 
-  const subject = subjectRes.data ?? null;
-  const semester = semesterRes.data ?? null;
+  const subject = (subjectRes.data as Subject | null) ?? null;
+  const semester = (semesterRes.data as Semester | null) ?? null;
 
   let course: Course | null = null;
   if (semester?.course_id) {
@@ -164,8 +196,8 @@ export async function getPaperById(id: string) {
       .select("id,name")
       .eq("id", semester.course_id)
       .single();
-    course = data ?? null;
+    course = (data as Course | null) ?? null;
   }
 
-  return { paper, subject, semester, course };
+  return { paper: paper as Paper, subject, semester, course };
 }
