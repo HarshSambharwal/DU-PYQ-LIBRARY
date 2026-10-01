@@ -38,7 +38,7 @@ export async function getHomeData(): Promise<{
       supabase.from("papers").select("*", { count: "exact", head: true }),
       supabase.from("courses").select("*", { count: "exact", head: true }),
       supabase.from("subject_master").select("*", { count: "exact", head: true }),
-      supabase.from("subject_master").select("id,name,").limit(6),
+      supabase.from("subject_master").select("id,name,"),
       supabase
         .from("papers")
         .select("id,title,year,pdf_url,subject_id,semester_id")
@@ -52,7 +52,7 @@ export async function getHomeData(): Promise<{
       courses: coursesCount.count ?? 0,
       subjects: subjectsCount.count ?? 0,
     },
-    featuredSubjects: featuredSubjects.data ?? [],
+    featuredSubjects: (featuredSubjects.data || []) as Subject[],
     recentPapers: (recentPapers.data ?? []) as Paper[],
   };
 }
