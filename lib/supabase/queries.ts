@@ -37,7 +37,7 @@ export async function getHomeData(): Promise<{
     await Promise.all([
       supabase.from("papers").select("*", { count: "exact", head: true }),
       supabase.from("courses").select("*", { count: "exact", head: true }),
-      supabase.from("subjects").select("*", { count: "exact", head: true }),
+      supabase.from("subject_master").select("*", { count: "exact", head: true }),
       supabase.from("subjects").select("id,name,semester_id").limit(6),
       supabase
         .from("papers")
