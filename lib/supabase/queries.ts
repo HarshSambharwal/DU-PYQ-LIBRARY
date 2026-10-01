@@ -52,7 +52,7 @@ export async function getHomeData(): Promise<{
       courses: coursesCount.count ?? 0,
       subjects: subjectsCount.count ?? 0,
     },
-    featuredSubjects: (featuredSubjects.data ?? []) as any[],
+    featuredSubjects: featuredSubjects.data ?? [],
     recentPapers: (recentPapers.data ?? []) as Paper[],
   };
 }
