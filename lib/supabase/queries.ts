@@ -2,7 +2,7 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 
 export type Course = { id: number; name: string };
 export type Semester = { id: number; number: number; course_id: number };
-export type Subject = { id: number; semester_id: number; name: string };
+export type Subject = { id: number; name: string };
 export type Paper = {
   id: number;
   title: string;
