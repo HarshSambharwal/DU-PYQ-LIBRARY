@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Download, ExternalLink, FileText } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import { getPaperById } from "@/lib/supabase/queries";
+import { PdfViewer } from "@/components/papers/pdf-viewer";
 
 export const dynamic = "force-dynamic";
 
@@ -59,12 +60,7 @@ export default async function PaperDetailsPage({
       </AnimatedSection>
 
       <AnimatedSection delay={0.1} className="overflow-hidden rounded-3xl border border-black/5 bg-white/90 shadow-sm dark:border-white/10 dark:bg-slate-900">
-        <iframe
-          src={paper.pdf_url}
-          title={paper.title}
-          className="h-[65vh] w-full"
-          loading="lazy"
-        />
+        <PdfViewer src={`/api/papers/${paper.id}/pdf`} title={paper.title} />
       </AnimatedSection>
     </div>
   );
