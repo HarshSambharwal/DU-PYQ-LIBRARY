@@ -7,7 +7,7 @@ const nextConfig = {
     return [
       {
         source: "/vendor/pdfjs-legacy/:path*",
-        destination: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_LEGACY_VERSION}/:path*`,
+        destination: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_LEGACY_VERSION}/legacy/build/:path*`,
       },
       {
         source: "/vendor/pdfjs/:path*",
