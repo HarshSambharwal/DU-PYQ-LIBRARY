@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { Course, Semester, Subject } from "@/lib/supabase/queries";
+import type { Course, Semester, SemesterSubject } from "@/lib/supabase/queries";
 
 export function BrowseFilters({
   courses,
@@ -12,7 +12,7 @@ export function BrowseFilters({
 }: {
   courses: Course[];
   semesters: Semester[];
-  subjects: Subject[];
+  subjects: SemesterSubject[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
