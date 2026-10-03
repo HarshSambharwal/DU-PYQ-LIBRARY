@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const PDFJS_CDN_BASE = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38";
+const PDFJS_BASE = "/vendor/pdfjs";
 
 type PdfViewport = { width: number; height: number };
 type PdfRenderTask = { promise: Promise<void>; cancel: () => void };
@@ -63,11 +63,11 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
 
     const loadPdf = async () => {
       try {
-        const moduleUrl = `${PDFJS_CDN_BASE}/pdf.min.mjs`;
+        const moduleUrl = `${PDFJS_BASE}/pdf.min.mjs`;
         const pdfjs = (await import(/* webpackIgnore: true */ moduleUrl)) as PdfJsModule;
         if (cancelled) return;
 
-        pdfjs.GlobalWorkerOptions.workerSrc = `${PDFJS_CDN_BASE}/pdf.worker.min.mjs`;
+        pdfjs.GlobalWorkerOptions.workerSrc = `${PDFJS_BASE}/pdf.worker.min.mjs`;
         loadingTask = pdfjs.getDocument({ url: src });
         const pdf = await loadingTask.promise;
         if (cancelled) {
