@@ -3,6 +3,7 @@ import { getSupabaseClient } from "@/lib/supabase/client";
 export type Course = { id: number; name: string };
 export type Semester = { id: number; number: number; course_id: number };
 export type Subject = { id: number; name: string };
+export type SemesterSubject = Subject & { semester_id: number };
 export type Paper = {
   id: number;
   title: string;
@@ -60,7 +61,7 @@ export async function getHomeData(): Promise<{
 export async function getBrowseFilters(): Promise<{
   courses: Course[];
   semesters: Semester[];
-  subjects: Subject[];
+  subjects: SemesterSubject[];
 }> {
   const supabase = getSupabaseClient();
 
@@ -81,7 +82,7 @@ export async function getBrowseFilters(): Promise<{
   return {
     courses: (courses.data ?? []) as Course[],
     semesters: (semesters.data ?? []) as Semester[],
-    subjects: (subjects.data ?? []) as Subject[],
+    subjects: (subjects.data ?? []) as SemesterSubject[],
   };
 }
 
