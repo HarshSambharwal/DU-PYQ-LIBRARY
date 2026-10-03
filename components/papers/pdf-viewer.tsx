@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-const PDFJS_BASE = "/vendor/pdfjs";
+const PDFJS_BASE = "/vendor/pdfjs-legacy";
 
 type PdfViewport = { width: number; height: number };
 type PdfRenderTask = { promise: Promise<void>; cancel: () => void };
@@ -26,8 +26,46 @@ type PdfLoadingTask = {
 };
 type PdfJsModule = {
   GlobalWorkerOptions: { workerSrc: string };
-  getDocument: (options: { url: string }) => PdfLoadingTask;
+  getDocument: (options: {
+    url: string;
+    disableRange?: boolean;
+    disableStream?: boolean;
+  }) => PdfLoadingTask;
 };
+type WindowWithPdfJs = Window & { pdfjsLib?: PdfJsModule };
+
+let pdfJsPromise: Promise<PdfJsModule> | null = null;
+
+function loadPdfJs(): Promise<PdfJsModule> {
+  const browserWindow = window as WindowWithPdfJs;
+  if (browserWindow.pdfjsLib) return Promise.resolve(browserWindow.pdfjsLib);
+  if (pdfJsPromise) return pdfJsPromise;
+
+  const script = document.createElement("script");
+  script.src = `${PDFJS_BASE}/pdf.min.js`;
+  script.async = true;
+
+  const pending = new Promise<PdfJsModule>((resolve, reject) => {
+    const fail = (error: Error) => {
+      pdfJsPromise = null;
+      if (script.parentNode) script.parentNode.removeChild(script);
+      reject(error);
+    };
+
+    script.onload = () => {
+      if (browserWindow.pdfjsLib) {
+        resolve(browserWindow.pdfjsLib);
+      } else {
+        fail(new Error("PDF.js did not initialize"));
+      }
+    };
+    script.onerror = () => fail(new Error("PDF.js could not be loaded"));
+    document.head.appendChild(script);
+  });
+
+  pdfJsPromise = pending;
+  return pending;
+}
 
 export function PdfViewer({ src, title }: { src: string; title: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -63,12 +101,17 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
 
     const loadPdf = async () => {
       try {
-        const moduleUrl = `${PDFJS_BASE}/pdf.min.mjs`;
-        const pdfjs = (await import(/* webpackIgnore: true */ moduleUrl)) as PdfJsModule;
+        const pdfjs = await loadPdfJs();
         if (cancelled) return;
 
-        pdfjs.GlobalWorkerOptions.workerSrc = `${PDFJS_BASE}/pdf.worker.min.mjs`;
-        loadingTask = pdfjs.getDocument({ url: src });
+        pdfjs.GlobalWorkerOptions.workerSrc = `${PDFJS_BASE}/pdf.worker.min.js`;
+        loadingTask = pdfjs.getDocument({
+          url: src,
+          // Fetch the whole file in one request. This is more reliable in mobile
+          // browsers and embedded WebViews with limited range-request support.
+          disableRange: true,
+          disableStream: true,
+        });
         const pdf = await loadingTask.promise;
         if (cancelled) {
           await loadingTask.destroy();
