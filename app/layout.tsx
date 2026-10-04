@@ -18,10 +18,15 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="font-sans">
         <ThemeProvider>
-          <div className="relative min-h-screen overflow-x-hidden bg-[#F7F5ED] text-palette-deep dark:bg-palette-deep dark:text-palette-cream">
-            <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_20%_20%,rgba(50,98,77,0.13),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(221,182,67,0.18),transparent_35%)] dark:bg-[radial-gradient(circle_at_20%_20%,rgba(50,98,77,0.34),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(221,182,67,0.10),transparent_35%)]" />
+          <div className="relative isolate min-h-screen overflow-x-hidden bg-[#F6F1E3] text-palette-deep dark:bg-[#102F2D] dark:text-palette-cream">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_15%_5%,rgba(50,98,77,0.14),transparent_36%),radial-gradient(ellipse_at_85%_24%,rgba(221,182,67,0.16),transparent_31%)] dark:bg-[radial-gradient(ellipse_at_15%_5%,rgba(50,98,77,0.3),transparent_36%),radial-gradient(ellipse_at_85%_24%,rgba(221,182,67,0.08),transparent_31%)]"
+            />
             <Navbar />
-            <main className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">{children}</main>
+            <main className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-8 sm:px-6 lg:px-8">
+              {children}
+            </main>
             <Footer />
           </div>
         </ThemeProvider>

@@ -2,8 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+}
+
 * {
-  @apply border-palette-green/20 dark:border-palette-gold/15;
+  @apply border-palette-green/15;
 }
 
 html,
@@ -11,7 +15,295 @@ body {
   @apply min-h-screen;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-[#F6F1E3] text-palette-deep antialiased dark:bg-[#102F2D] dark:text-palette-cream;
+}
+
 ::selection {
   background-color: rgba(221, 182, 67, 0.35);
   color: #163937;
+}
+
+:focus-visible {
+  outline: 2px solid #DDB643;
+  outline-offset: 3px;
+}
+
+.study-nook {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 31rem);
+  height: 22rem;
+  margin-inline: auto;
+  perspective: 900px;
+  transition: transform 450ms ease;
+}
+
+.study-wall {
+  position: absolute;
+  inset: 0.45rem 0.25rem 2.75rem;
+  overflow: hidden;
+  border: 1px solid rgba(221, 182, 67, 0.28);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 16% 14%, rgba(221, 182, 67, 0.18), transparent 29%),
+    linear-gradient(125deg, #214b3d 0%, #163937 58%, #25493d 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 24px 55px rgba(7, 28, 26, 0.3);
+}
+
+.study-wall::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 29%;
+  background: linear-gradient(135deg, #905f1e, #561c0d);
+  content: "";
+  opacity: 0.9;
+}
+
+.study-wall::after {
+  position: absolute;
+  top: 0;
+  right: 28%;
+  bottom: 0;
+  width: 1px;
+  background: rgba(246, 241, 227, 0.16);
+  content: "";
+}
+
+.study-note {
+  position: absolute;
+  z-index: 1;
+  top: 17%;
+  right: 5%;
+  max-width: 7rem;
+  color: #F6F1E3;
+  font-family: Georgia, serif;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  transform: rotate(4deg);
+  transition: transform 450ms ease;
+}
+
+.study-note strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: #DDB643;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.study-shelf {
+  position: absolute;
+  z-index: 3;
+  right: 0;
+  bottom: 2.6rem;
+  left: 0;
+  height: 0.85rem;
+  border-radius: 0.45rem;
+  background: linear-gradient(180deg, #905F1E, #561C0D);
+  box-shadow: 0 12px 22px rgba(7, 28, 26, 0.28);
+}
+
+.study-shelf::after {
+  position: absolute;
+  right: 0.2rem;
+  bottom: -0.65rem;
+  left: 0.2rem;
+  height: 0.75rem;
+  border-radius: 0 0 0.35rem 0.35rem;
+  background: linear-gradient(90deg, #561C0D, #713518);
+  content: "";
+}
+
+.study-book {
+  position: absolute;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  padding-left: 1rem;
+  border: 1px solid rgba(22, 57, 55, 0.22);
+  border-left: 0.45rem solid rgba(22, 57, 55, 0.26);
+  border-radius: 0.45rem 0.6rem 0.6rem 0.45rem;
+  box-shadow: 0 9px 15px rgba(7, 28, 26, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  color: rgba(22, 57, 55, 0.85);
+  font-family: Georgia, serif;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  transition: transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.study-book--base {
+  bottom: 3.35rem;
+  left: 8%;
+  width: 63%;
+  height: 2.15rem;
+  background: linear-gradient(180deg, #DDB643, #c99f2e);
+}
+
+.study-book--middle {
+  bottom: 5.4rem;
+  left: 12%;
+  width: 56%;
+  height: 2.05rem;
+  background: linear-gradient(180deg, #32624D, #244d3e);
+  color: #F6F1E3;
+}
+
+.study-book--top {
+  bottom: 7.35rem;
+  left: 17%;
+  width: 49%;
+  height: 1.9rem;
+  background: linear-gradient(180deg, #905F1E, #744815);
+  color: #F6F1E3;
+}
+
+.study-pencil-pot {
+  position: absolute;
+  z-index: 5;
+  right: 12%;
+  bottom: 3.45rem;
+  display: flex;
+  width: 3.9rem;
+  height: 3rem;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(246, 241, 227, 0.17);
+  border-radius: 0.7rem 0.7rem 1rem 1rem;
+  background: linear-gradient(145deg, #32624D, #163937);
+  box-shadow: 0 9px 16px rgba(7, 28, 26, 0.26);
+  transition: transform 450ms ease;
+}
+
+.study-pencil {
+  position: relative;
+  top: -1.75rem;
+  width: 0.38rem;
+  height: 2.7rem;
+  border-radius: 0.2rem;
+  background: #DDB643;
+  transform-origin: bottom center;
+  transition: transform 450ms ease;
+}
+
+.study-pencil::before {
+  position: absolute;
+  top: -0.35rem;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-right: 0.19rem solid transparent;
+  border-bottom: 0.38rem solid #F6F1E3;
+  border-left: 0.19rem solid transparent;
+  content: "";
+}
+
+.study-pencil--one {
+  background: #DDB643;
+  transform: rotate(-12deg);
+}
+
+.study-pencil--two {
+  height: 3.2rem;
+  background: #F6F1E3;
+  transform: rotate(2deg);
+}
+
+.study-pencil--three {
+  background: #905F1E;
+  transform: rotate(13deg);
+}
+
+.study-floating-tag {
+  position: absolute;
+  z-index: 6;
+  top: 8%;
+  left: 6%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(221, 182, 67, 0.35);
+  border-radius: 999px;
+  background: rgba(22, 57, 55, 0.86);
+  padding: 0.55rem 0.75rem;
+  color: #F6F1E3;
+  font-size: 0.7rem;
+  letter-spacing: 0.03em;
+  box-shadow: 0 8px 20px rgba(7, 28, 26, 0.2);
+}
+
+.study-nook:hover .study-book--base {
+  transform: translateY(-3px) rotate(-1deg);
+}
+
+.study-nook:hover .study-book--middle {
+  transform: translateY(-5px) rotate(1deg);
+}
+
+.study-nook:hover .study-book--top {
+  transform: translateY(-8px) rotate(-2deg);
+}
+
+.study-nook:hover .study-pencil-pot {
+  transform: translateY(-4px) rotate(2deg);
+}
+
+.study-nook:hover .study-note {
+  transform: rotate(1deg) translateY(-3px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .study-nook {
+    height: 18rem;
+  }
+
+  .study-wall {
+    inset: 0.35rem 0 2.2rem;
+  }
+
+  .study-shelf {
+    bottom: 2.05rem;
+  }
+
+  .study-book--base {
+    bottom: 2.8rem;
+  }
+
+  .study-book--middle {
+    bottom: 4.85rem;
+  }
+
+  .study-book--top {
+    bottom: 6.8rem;
+  }
+
+  .study-pencil-pot {
+    bottom: 2.9rem;
+    right: 8%;
+    transform: scale(0.88);
+    transform-origin: bottom right;
+  }
 }
