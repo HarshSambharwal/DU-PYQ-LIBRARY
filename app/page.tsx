@@ -95,9 +95,9 @@ export default async function Home() {
       <AnimatedSection delay={0.08}>
         <div className="grid gap-3 sm:grid-cols-3">
           {[
-            { label: "Papers available", value: stats.papers, icon: FileCheck2 },
             { label: "Courses covered", value: stats.courses, icon: Building2 },
             { label: "Subjects to explore", value: stats.subjects, icon: BookOpen },
+            { label: "Papers available", value: stats.papers, icon: FileCheck2 },
           ].map((item) => (
             <div key={item.label} className="group flex items-center gap-4 rounded-2xl border border-palette-green/15 bg-white/80 p-4 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-palette-gold/60 hover:shadow-md dark:border-palette-gold/15 dark:bg-palette-green/50 sm:p-5">
               <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-palette-gold/20 text-palette-earth transition group-hover:rotate-3 dark:text-palette-gold">
