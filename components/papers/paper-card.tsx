@@ -1,14 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, Calendar, FileText } from "lucide-react";
-import type { Paper, Semester, Subject } from "@/lib/supabase/queries";
+import { ArrowRight, Calendar } from "lucide-react";
+import type { Paper, Semester } from "@/lib/supabase/queries";
 
 export function PaperCard({
   paper,
-  subject,
   semester,
 }: {
   paper: Paper;
-  subject?: Subject;
   semester?: Semester;
 }) {
   return (
@@ -24,10 +22,6 @@ export function PaperCard({
       </div>
 
       <h3 className="text-lg font-semibold text-palette-deep dark:text-palette-cream">{paper.title}</h3>
-      <p className="mt-2 inline-flex items-center gap-2 text-sm text-palette-earth/85 dark:text-palette-cream/75">
-        <FileText className="h-4 w-4" />
-        {subject?.name ?? "Subject unavailable"}
-      </p>
 
       <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-palette-earth group-hover:gap-3 dark:text-palette-gold">
         View details <ArrowRight className="h-4 w-4" />
