@@ -32,7 +32,7 @@ export default async function BrowsePage({
     <div className="space-y-8 py-10">
       <AnimatedSection>
         <h1 className="text-3xl font-bold sm:text-4xl">Browse Previous Year Papers</h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+        <p className="mt-2 text-sm text-palette-earth/85 dark:text-palette-cream/75">
           Filter by course, semester, and subject to find the exact paper you need.
         </p>
       </AnimatedSection>
@@ -42,7 +42,7 @@ export default async function BrowsePage({
       </AnimatedSection>
 
       <AnimatedSection delay={0.2}>
-        <p className="mb-4 text-sm text-slate-600 dark:text-slate-300">{papers.length} paper(s) found</p>
+        <p className="mb-4 text-sm text-palette-earth/85 dark:text-palette-cream/75">{papers.length} paper(s) found</p>
         {papers.length ? (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {papers.map((paper) => (
@@ -55,10 +55,10 @@ export default async function BrowsePage({
             ))}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-black/10 bg-white/80 p-10 text-center dark:border-white/15 dark:bg-slate-900">
-            <SearchX className="mx-auto h-7 w-7 text-slate-500" />
+          <div className="rounded-2xl border border-dashed border-palette-green/25 bg-white/80 p-10 text-center dark:border-palette-gold/20 dark:bg-palette-green/45">
+            <SearchX className="mx-auto h-7 w-7 text-palette-earth dark:text-palette-gold" />
             <p className="mt-3 font-medium">No papers matched your filters.</p>
-            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Try changing the search term or removing some filters.</p>
+            <p className="mt-1 text-sm text-palette-earth/85 dark:text-palette-cream/75">Try changing the search term or removing some filters.</p>
           </div>
         )}
       </AnimatedSection>
