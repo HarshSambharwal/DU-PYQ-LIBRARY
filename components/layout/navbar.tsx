@@ -10,10 +10,10 @@ const navItems = [
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-black/5 bg-white/70 backdrop-blur-lg dark:border-white/10 dark:bg-slate-950/80">
+    <header className="sticky top-0 z-40 border-b border-palette-green/15 bg-[#FBFAF5]/85 backdrop-blur-lg dark:border-palette-gold/15 dark:bg-palette-deep/85">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
-          <span className="rounded-lg bg-gradient-to-br from-indigo-600 to-cyan-500 p-2 text-white">
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold text-palette-deep dark:text-palette-cream">
+          <span className="rounded-lg bg-gradient-to-br from-palette-green to-palette-gold p-2 text-palette-deep">
             <GraduationCap className="h-4 w-4" />
           </span>
           DU PYQ HUB
@@ -24,7 +24,7 @@ export function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className="text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+              className="text-palette-earth transition hover:text-palette-rust dark:text-palette-cream/75 dark:hover:text-palette-gold"
             >
               {item.label}
             </Link>
