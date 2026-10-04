@@ -21,7 +21,7 @@ export default async function BrowsePage({
   const resolvedSearchParams = await searchParams;
   const { courses, semesters, subjects } = await getBrowseFilters();
 
-  const { papers, subjectMap, semesterMap } = await getPapers({
+  const { papers, semesterMap } = await getPapers({
     search: resolvedSearchParams.q,
     courseId: resolvedSearchParams.course ? Number(resolvedSearchParams.course) : undefined,
     semesterId: resolvedSearchParams.semester ? Number(resolvedSearchParams.semester) : undefined,
@@ -49,7 +49,6 @@ export default async function BrowsePage({
               <PaperCard
                 key={paper.id}
                 paper={paper}
-                subject={subjectMap.get(paper.subject_id)}
                 semester={semesterMap.get(paper.semester_id)}
               />
             ))}
