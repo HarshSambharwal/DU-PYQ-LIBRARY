@@ -8,7 +8,18 @@ const config: Config = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        palette: {
+          deep: "#163937",
+          green: "#32624D",
+          gold: "#DDB643",
+          earth: "#905F1E",
+          rust: "#561C0D",
+          cream: "#F6F1E3",
+        },
+      },
+    },
   },
   plugins: [],
 };

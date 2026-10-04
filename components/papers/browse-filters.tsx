@@ -46,15 +46,15 @@ export function BrowseFilters({
   };
 
   return (
-    <div className="space-y-4 rounded-2xl border border-black/5 bg-white/90 p-5 shadow-sm dark:border-white/10 dark:bg-slate-900">
+    <div className="space-y-4 rounded-2xl border border-palette-green/15 bg-white/90 p-5 shadow-sm dark:border-palette-gold/15 dark:bg-palette-green/65">
       <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-palette-earth/70 dark:text-palette-cream/60" />
         <input
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           onKeyDown={(event) => event.key === "Enter" && update({ q: search })}
           placeholder="Search papers by title..."
-          className="h-11 w-full rounded-xl border border-black/10 bg-white pl-10 pr-3 text-sm outline-none ring-indigo-500/40 transition focus:ring dark:border-white/10 dark:bg-slate-950"
+          className="h-11 w-full rounded-xl border border-palette-green/20 bg-white pl-10 pr-3 text-sm text-palette-deep outline-none ring-palette-gold/40 transition placeholder:text-palette-earth/60 focus:ring-2 dark:border-palette-gold/20 dark:bg-palette-deep dark:text-palette-cream dark:placeholder:text-palette-cream/50"
         />
       </div>
 
@@ -62,7 +62,7 @@ export function BrowseFilters({
         <select
           value={selectedCourse}
           onChange={(event) => update({ course: event.target.value, semester: "", subject: "" })}
-          className="h-11 rounded-xl border border-black/10 bg-white px-3 text-sm outline-none ring-indigo-500/40 focus:ring dark:border-white/10 dark:bg-slate-950"
+          className="h-11 rounded-xl border border-palette-green/20 bg-white px-3 text-sm text-palette-deep outline-none ring-palette-gold/40 focus:ring-2 dark:border-palette-gold/20 dark:bg-palette-deep dark:text-palette-cream"
         >
           <option value="">All Courses</option>
           {courses.map((course) => (
@@ -75,7 +75,7 @@ export function BrowseFilters({
         <select
           value={selectedSemester}
           onChange={(event) => update({ semester: event.target.value, subject: "" })}
-          className="h-11 rounded-xl border border-black/10 bg-white px-3 text-sm outline-none ring-indigo-500/40 focus:ring dark:border-white/10 dark:bg-slate-950"
+          className="h-11 rounded-xl border border-palette-green/20 bg-white px-3 text-sm text-palette-deep outline-none ring-palette-gold/40 focus:ring-2 dark:border-palette-gold/20 dark:bg-palette-deep dark:text-palette-cream"
         >
           <option value="">All Semesters</option>
           {visibleSemesters.map((semester) => (
@@ -88,7 +88,7 @@ export function BrowseFilters({
         <select
           value={selectedSubject}
           onChange={(event) => update({ subject: event.target.value })}
-          className="h-11 rounded-xl border border-black/10 bg-white px-3 text-sm outline-none ring-indigo-500/40 focus:ring dark:border-white/10 dark:bg-slate-950"
+          className="h-11 rounded-xl border border-palette-green/20 bg-white px-3 text-sm text-palette-deep outline-none ring-palette-gold/40 focus:ring-2 dark:border-palette-gold/20 dark:bg-palette-deep dark:text-palette-cream"
         >
           <option value="">All Subjects</option>
           {visibleSubjects.map((subject) => (
@@ -102,7 +102,7 @@ export function BrowseFilters({
       <button
         type="button"
         onClick={() => update({ q: search })}
-        className="inline-flex h-11 items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-500 px-5 text-sm font-medium text-white shadow transition hover:opacity-90"
+        className="inline-flex h-11 items-center justify-center rounded-xl bg-palette-gold px-5 text-sm font-semibold text-palette-deep shadow transition hover:bg-palette-earth hover:text-palette-cream"
       >
         Apply filters
       </button>

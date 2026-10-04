@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 * {
-  @apply border-slate-200 dark:border-slate-800;
+  @apply border-palette-green/20 dark:border-palette-gold/15;
 }
 
 html,
@@ -12,5 +12,6 @@ body {
 }
 
 ::selection {
-  @apply bg-indigo-500/30 text-slate-900 dark:text-white;
+  background-color: rgba(221, 182, 67, 0.35);
+  color: #163937;
 }

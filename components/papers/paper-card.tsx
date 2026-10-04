@@ -14,22 +14,22 @@ export function PaperCard({
   return (
     <Link
       href={`/papers/${paper.id}`}
-      className="group rounded-2xl border border-black/5 bg-white/90 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-white/10 dark:bg-slate-900"
+      className="group rounded-2xl border border-palette-green/15 bg-white/90 p-5 shadow-sm transition hover:-translate-y-1 hover:border-palette-gold/50 hover:shadow-lg dark:border-palette-gold/15 dark:bg-palette-green/65"
     >
-      <div className="mb-4 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-        <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-200">
+      <div className="mb-4 flex items-center justify-between text-xs text-palette-earth/75 dark:text-palette-cream/60">
+        <span className="inline-flex items-center gap-1 rounded-full bg-palette-gold/20 px-3 py-1 text-palette-earth dark:bg-palette-gold/20 dark:text-palette-cream">
           <Calendar className="h-3.5 w-3.5" /> {paper.year}
         </span>
         {semester ? <span>Semester {semester.number}</span> : null}
       </div>
 
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{paper.title}</h3>
-      <p className="mt-2 inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+      <h3 className="text-lg font-semibold text-palette-deep dark:text-palette-cream">{paper.title}</h3>
+      <p className="mt-2 inline-flex items-center gap-2 text-sm text-palette-earth/85 dark:text-palette-cream/75">
         <FileText className="h-4 w-4" />
         {subject?.name ?? "Subject unavailable"}
       </p>
 
-      <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-indigo-600 group-hover:gap-3 dark:text-indigo-300">
+      <span className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-palette-earth group-hover:gap-3 dark:text-palette-gold">
         View details <ArrowRight className="h-4 w-4" />
       </span>
     </Link>

@@ -182,26 +182,26 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
 
   if (status === "error") {
     return (
-      <div className="rounded-2xl bg-slate-100 p-6 text-center text-sm text-slate-600 dark:bg-slate-950 dark:text-slate-300" role="alert">
+      <div className="rounded-2xl bg-palette-cream p-6 text-center text-sm text-palette-earth dark:bg-palette-deep dark:text-palette-cream/80" role="alert">
         This PDF could not be displayed here. Use the Download PDF or Open in new tab buttons above.
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-950">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/5 px-3 py-3 dark:border-white/10 sm:px-4">
+    <div className="overflow-hidden rounded-2xl bg-palette-cream dark:bg-palette-deep">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-palette-green/20 px-3 py-3 dark:border-palette-gold/15 sm:px-4">
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => setPageNumber((current) => Math.max(1, current - 1))}
             disabled={status !== "ready" || pageNumber <= 1}
             aria-label="Previous page"
-            className="rounded-lg border border-black/10 bg-white p-2 text-slate-700 disabled:opacity-40 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
+            className="rounded-lg border border-palette-green/20 bg-white p-2 text-palette-deep disabled:opacity-40 dark:border-palette-gold/20 dark:bg-palette-green dark:text-palette-cream"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <span className="min-w-20 text-center text-sm text-slate-700 dark:text-slate-200" aria-live="polite">
+          <span className="min-w-20 text-center text-sm text-palette-earth dark:text-palette-cream/85" aria-live="polite">
             {status === "ready" ? `Page ${pageNumber} of ${pageCount}` : "Loading PDF…"}
           </span>
           <button
@@ -209,7 +209,7 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
             onClick={() => setPageNumber((current) => Math.min(pageCount, current + 1))}
             disabled={status !== "ready" || pageNumber >= pageCount}
             aria-label="Next page"
-            className="rounded-lg border border-black/10 bg-white p-2 text-slate-700 disabled:opacity-40 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
+            className="rounded-lg border border-palette-green/20 bg-white p-2 text-palette-deep disabled:opacity-40 dark:border-palette-gold/20 dark:bg-palette-green dark:text-palette-cream"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -221,11 +221,11 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
             onClick={() => setZoom((current) => Math.max(0.75, current - 0.25))}
             disabled={status !== "ready" || zoom <= 0.75}
             aria-label="Zoom out"
-            className="rounded-lg border border-black/10 bg-white p-2 text-slate-700 disabled:opacity-40 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
+            className="rounded-lg border border-palette-green/20 bg-white p-2 text-palette-deep disabled:opacity-40 dark:border-palette-gold/20 dark:bg-palette-green dark:text-palette-cream"
           >
             <ZoomOut className="h-4 w-4" />
           </button>
-          <span className="w-12 text-center text-sm text-slate-700 dark:text-slate-200">
+          <span className="w-12 text-center text-sm text-palette-earth dark:text-palette-cream/85">
             {Math.round(zoom * 100)}%
           </span>
           <button
@@ -233,7 +233,7 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
             onClick={() => setZoom((current) => Math.min(2.5, current + 0.25))}
             disabled={status !== "ready" || zoom >= 2.5}
             aria-label="Zoom in"
-            className="rounded-lg border border-black/10 bg-white p-2 text-slate-700 disabled:opacity-40 dark:border-white/10 dark:bg-slate-900 dark:text-slate-200"
+            className="rounded-lg border border-palette-green/20 bg-white p-2 text-palette-deep disabled:opacity-40 dark:border-palette-gold/20 dark:bg-palette-green dark:text-palette-cream"
           >
             <ZoomIn className="h-4 w-4" />
           </button>
@@ -242,7 +242,7 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
 
       <div ref={containerRef} className="max-h-[78vh] overflow-auto p-3 sm:p-4">
         {status === "loading" && (
-          <div className="flex min-h-72 items-center justify-center text-sm text-slate-600 dark:text-slate-300">
+          <div className="flex min-h-72 items-center justify-center text-sm text-palette-earth/85 dark:text-palette-cream/75">
             Loading {title}…
           </div>
         )}

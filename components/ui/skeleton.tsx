@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse rounded-xl bg-slate-200/70 dark:bg-slate-800/70", className)} />;
+  return <div className={cn("animate-pulse rounded-xl bg-palette-green/10 dark:bg-palette-green/55", className)} />;
 }
