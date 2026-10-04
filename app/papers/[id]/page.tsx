@@ -22,29 +22,37 @@ export default async function PaperDetailsPage({
   const { paper, subject, semester, course } = paperData;
 
   return (
-    <div className="space-y-7 py-10">
-      <Link href="/browse" className="inline-flex items-center gap-2 text-sm font-medium text-palette-earth dark:text-palette-cream/85">
-        <ArrowLeft className="h-4 w-4" /> Back to browse
+    <div className="space-y-7 py-8 sm:py-10">
+      <Link href="/browse" className="group inline-flex items-center gap-2 rounded-full border border-palette-green/20 bg-white/70 px-4 py-2 text-sm font-medium text-palette-earth transition hover:border-palette-gold hover:text-palette-rust dark:border-palette-gold/20 dark:bg-palette-green/35 dark:text-palette-cream">
+        <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-1" /> Back to browse
       </Link>
 
-      <AnimatedSection className="rounded-3xl border border-palette-green/15 bg-white/90 p-7 shadow-sm dark:border-palette-gold/15 dark:bg-palette-green/65">
-        <p className="mb-2 inline-flex items-center gap-2 rounded-full bg-palette-gold/20 px-3 py-1 text-xs font-medium text-palette-earth dark:bg-palette-gold/20 dark:text-palette-cream">
-          <FileText className="h-3.5 w-3.5" /> PYQ Details
+      <AnimatedSection className="relative isolate overflow-hidden rounded-[2rem] border border-palette-gold/25 bg-gradient-to-br from-palette-deep via-palette-green to-palette-deep p-6 text-palette-cream shadow-2xl sm:p-9">
+        <div aria-hidden="true" className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full border border-palette-gold/15" />
+        <p className="relative mb-3 inline-flex items-center gap-2 rounded-full border border-palette-gold/30 bg-palette-gold/10 px-3 py-1.5 text-xs font-semibold text-palette-gold">
+          <FileText className="h-3.5 w-3.5" /> Paper details
         </p>
-        <h1 className="text-2xl font-bold sm:text-3xl">{paper.title}</h1>
-        <div className="mt-4 grid gap-3 text-sm text-palette-earth/85 dark:text-palette-cream/75 sm:grid-cols-2 lg:grid-cols-4">
-          <p><span className="font-semibold">Subject:</span> {subject?.name ?? "N/A"}</p>
-          <p><span className="font-semibold">Semester:</span> {semester?.number ? `Semester ${semester.number}` : "N/A"}</p>
-          <p><span className="font-semibold">Course:</span> {course?.name ?? "N/A"}</p>
-          <p><span className="font-semibold">Year:</span> {paper.year}</p>
+        <h1 className="relative max-w-4xl font-serif text-2xl font-semibold leading-tight sm:text-3xl lg:text-4xl">{paper.title}</h1>
+        <div className="relative mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: "Subject", value: subject?.name ?? "N/A" },
+            { label: "Semester", value: semester?.number ? `Semester ${semester.number}` : "N/A" },
+            { label: "Course", value: course?.name ?? "N/A" },
+            { label: "Year", value: String(paper.year) },
+          ].map((item) => (
+            <div key={item.label} className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+              <p className="text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-palette-gold">{item.label}</p>
+              <p className="mt-1 text-sm text-palette-cream/90">{item.value}</p>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="relative mt-6 flex flex-wrap gap-3">
           <a
             href={paper.pdf_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl bg-palette-gold px-5 py-2.5 text-sm font-semibold text-palette-deep transition hover:bg-palette-earth hover:text-palette-cream"
+            className="inline-flex items-center gap-2 rounded-xl bg-palette-gold px-5 py-3 text-sm font-semibold text-palette-deep transition duration-200 hover:-translate-y-0.5 hover:bg-[#E8C65F]"
           >
             <Download className="h-4 w-4" /> Download PDF
           </a>
@@ -52,14 +60,14 @@ export default async function PaperDetailsPage({
             href={paper.pdf_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border border-palette-green/20 bg-white px-5 py-2.5 text-sm font-semibold text-palette-deep transition hover:border-palette-gold dark:border-palette-gold/20 dark:bg-palette-deep dark:text-palette-cream"
+            className="inline-flex items-center gap-2 rounded-xl border border-palette-cream/25 bg-palette-deep/40 px-5 py-3 text-sm font-semibold text-palette-cream transition duration-200 hover:border-palette-gold hover:text-palette-gold"
           >
             <ExternalLink className="h-4 w-4" /> Open in new tab
           </a>
         </div>
       </AnimatedSection>
 
-      <AnimatedSection delay={0.1} className="overflow-hidden rounded-3xl border border-palette-green/15 bg-white/90 shadow-sm dark:border-palette-gold/15 dark:bg-palette-green/65">
+      <AnimatedSection delay={0.08} className="overflow-hidden rounded-3xl border border-palette-green/20 bg-white/80 p-2 shadow-xl dark:border-palette-gold/20 dark:bg-palette-green/35 sm:p-3">
         <PdfViewer src={`/api/papers/${paper.id}/pdf`} title={paper.title} />
       </AnimatedSection>
     </div>
