@@ -1,4 +1,4 @@
-import { getPaperById } from "@/lib/supabase/queries";
+import { getPaperPdfUrlById } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -7,9 +7,9 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const paperData = await getPaperById(id);
+  const pdfUrl = await getPaperPdfUrlById(id);
 
-  if (!paperData) {
+  if (!pdfUrl) {
     return new Response("Paper not found", { status: 404 });
   }
 
@@ -17,7 +17,7 @@ export async function GET(
   const range = request.headers.get("range");
   if (range) requestHeaders.set("range", range);
 
-  const pdfResponse = await fetch(paperData.paper.pdf_url, {
+  const pdfResponse = await fetch(pdfUrl, {
     headers: requestHeaders,
     cache: "force-cache",
   });
@@ -30,6 +30,7 @@ export async function GET(
     "Content-Type": "application/pdf",
     "Content-Disposition": 'inline; filename="paper.pdf"',
     "Cache-Control": "public, max-age=3600, s-maxage=86400",
+    "Accept-Ranges": "bytes",
   });
 
   for (const header of ["accept-ranges", "content-length", "content-range", "etag", "last-modified"]) {

@@ -40,30 +40,19 @@ type BrowseResult = {
 
 export async function getHomeData(): Promise<{
   stats: { papers: number; courses: number; subjects: number };
-  featuredSubjects: Subject[];
-  recentPapers: Paper[];
 }> {
   const supabase = getSupabaseClient();
 
   if (!supabase) {
     return {
       stats: { papers: 0, courses: 0, subjects: 0 },
-      featuredSubjects: [],
-      recentPapers: [],
     };
   }
 
-  const [papersCount, coursesCount, subjectsCount, featuredSubjects, recentPapers] =
-    await Promise.all([
+  const [papersCount, coursesCount, subjectsCount] = await Promise.all([
       supabase.from("papers").select("*", { count: "exact", head: true }),
       supabase.from("courses").select("*", { count: "exact", head: true }),
       supabase.from("subject_master").select("*", { count: "exact", head: true }),
-      supabase.from("subject_master").select("id,name"),
-      supabase
-        .from("papers")
-        .select("id,title,year,pdf_url,subject_id,semester_id")
-        .order("year", { ascending: false })
-        .limit(6),
     ]);
 
   return {
@@ -72,8 +61,6 @@ export async function getHomeData(): Promise<{
       courses: coursesCount.count ?? 0,
       subjects: subjectsCount.count ?? 0,
     },
-    featuredSubjects: (featuredSubjects.data || []) as Subject[],
-    recentPapers: (recentPapers.data ?? []) as Paper[],
   };
 }
 
@@ -249,23 +236,23 @@ export async function getPaperById(id: string): Promise<{
 
   const { data: paper } = await supabase
     .from("papers")
-    .select("id,title,year,pdf_url,subject_id,semester_id")
+    .select("id,title,sequence_number,year,pdf_url,subject_id,semester_id,category,source_subject_label")
     .eq("id", Number(id))
     .single();
 
   if (!paper) return null;
 
   const [subjectRes, semesterRes] = await Promise.all([
-    supabase
+    paper.subject_id ? supabase
       .from("subjects")
       .select("id,name,semester_id")
       .eq("id", paper.subject_id)
-      .single(),
-    supabase
+      .single() : Promise.resolve({ data: null }),
+    paper.semester_id ? supabase
       .from("semester")
       .select("id,number,course_id")
       .eq("id", paper.semester_id)
-      .single(),
+      .single() : Promise.resolve({ data: null }),
   ]);
 
   const subject = (subjectRes.data as Subject | null) ?? null;
@@ -282,4 +269,20 @@ export async function getPaperById(id: string): Promise<{
   }
 
   return { paper: paper as Paper, subject, semester, course };
+}
+
+export async function getPaperPdfUrlById(id: string): Promise<string | null> {
+  const supabase = getSupabaseClient();
+  const paperId = Number(id);
+
+  if (!supabase || !Number.isSafeInteger(paperId) || paperId <= 0) return null;
+
+  const { data, error } = await supabase
+    .from("papers")
+    .select("pdf_url")
+    .eq("id", paperId)
+    .single();
+
+  if (error || typeof data?.pdf_url !== "string" || data.pdf_url.length === 0) return null;
+  return data.pdf_url;
 }

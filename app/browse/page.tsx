@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, SearchX } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import { BrowseFilters } from "@/components/papers/browse-filters";
 import { PaperCard } from "@/components/papers/paper-card";
@@ -28,6 +28,12 @@ export default async function BrowsePage({
     semesterId: resolvedSearchParams.semester ? Number(resolvedSearchParams.semester) : undefined,
     browseFilter: selectedFilter?.value,
   });
+  const hasActiveSearch = Boolean(
+    resolvedSearchParams.q?.trim() ||
+      resolvedSearchParams.course ||
+      resolvedSearchParams.semester ||
+      selectedFilter,
+  );
 
   return (
     <div className="space-y-8 py-8 sm:py-10">
@@ -38,7 +44,7 @@ export default async function BrowsePage({
           </p>
           <h1 className="font-serif text-3xl font-semibold tracking-tight sm:text-4xl">Browse previous year papers</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-palette-earth/80 dark:text-palette-cream/70">
-            Filter by course, semester, and subject to find the exact paper you need.
+            Search by paper or subject name. Semester papers can also be filtered by course and semester.
           </p>
         </div>
         <Link href="/" className="hidden text-sm font-semibold text-palette-earth transition hover:text-palette-rust dark:text-palette-gold dark:hover:text-palette-cream sm:inline-flex">
@@ -50,33 +56,27 @@ export default async function BrowsePage({
         <BrowseFilters courses={courses} semesters={semesters} filters={filters} />
       </AnimatedSection>
 
-      <AnimatedSection delay={0.14}>
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <p className="font-serif text-xl font-semibold sm:text-2xl">The paper shelf</p>
-          <span className="inline-flex items-center gap-2 rounded-full border border-palette-gold/40 bg-palette-gold/15 px-3 py-1.5 text-xs font-semibold text-palette-earth dark:text-palette-gold">
-            {papers.length} {papers.length === 1 ? "paper" : "papers"} found
-          </span>
+      {hasActiveSearch ? (
+        <p aria-live="polite" className="text-sm text-palette-earth/80 dark:text-palette-cream/70">
+          {paperCount} matching {paperCount === 1 ? "paper" : "papers"}
+        </p>
+      ) : null}
+
+      {hasActiveSearch && papers.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {papers.map((paper) => (
+            <PaperCard
+              key={paper.id}
+              paper={paper}
+              semester={paper.semester_id == null ? undefined : semesterMap.get(paper.semester_id)}
+            />
+          ))}
         </div>
-        {papers.length ? (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {papers.map((paper) => (
-              <PaperCard
-                key={paper.id}
-                paper={paper}
-                semester={paper.semester_id == null ? undefined : semesterMap.get(paper.semester_id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-3xl border border-dashed border-palette-green/30 bg-white/60 p-10 text-center dark:border-palette-gold/20 dark:bg-palette-green/35">
-            <span className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-palette-gold/20 text-palette-earth dark:text-palette-gold">
-              <SearchX className="h-7 w-7" />
-            </span>
-            <p className="mt-4 font-serif text-xl font-semibold">No papers on this shelf yet</p>
-            <p className="mt-2 text-sm text-palette-earth/80 dark:text-palette-cream/70">Try changing the search term or removing some filters.</p>
-          </div>
-        )}
-      </AnimatedSection>
+      ) : hasActiveSearch ? (
+        <p className="rounded-2xl border border-dashed border-palette-green/25 bg-white/60 p-6 text-center text-sm text-palette-earth/80 dark:border-palette-gold/20 dark:bg-palette-green/25 dark:text-palette-cream/70">
+          No papers currently match this search or category.
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -5,10 +5,13 @@ import { useEffect, useRef, useState } from "react";
 
 const PDFJS_BASE = "/vendor/pdfjs-legacy";
 
-type PdfViewport = { width: number; height: number };
+type PdfViewport = { width: number; height: number; scale: number };
 type PdfRenderTask = { promise: Promise<void>; cancel: () => void };
+type PdfTextLayer = { render: () => Promise<void>; cancel: () => void };
+type PdfTextContent = { items?: Array<{ str?: unknown }> };
 type PdfPage = {
   getViewport: (options: { scale: number }) => PdfViewport;
+  getTextContent: () => Promise<unknown>;
   render: (options: {
     canvas: HTMLCanvasElement;
     canvasContext: CanvasRenderingContext2D;
@@ -26,6 +29,11 @@ type PdfLoadingTask = {
 };
 type PdfJsModule = {
   GlobalWorkerOptions: { workerSrc: string };
+  TextLayer: new (options: {
+    textContentSource: unknown;
+    container: HTMLDivElement;
+    viewport: PdfViewport;
+  }) => PdfTextLayer;
   getDocument: (options: {
     url: string;
     disableRange?: boolean;
@@ -42,7 +50,8 @@ function loadPdfJs(): Promise<PdfJsModule> {
   if (pdfJsPromise) return pdfJsPromise;
 
   const script = document.createElement("script");
-  script.src = `${PDFJS_BASE}/pdf.min.js`;
+  script.type = "module";
+  script.src = `${PDFJS_BASE}/pdfjs-loader.mjs`;
   script.async = true;
 
   const pending = new Promise<PdfJsModule>((resolve, reject) => {
@@ -70,12 +79,15 @@ function loadPdfJs(): Promise<PdfJsModule> {
 export function PdfViewer({ src, title }: { src: string; title: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const textLayerRef = useRef<HTMLDivElement>(null);
   const documentRef = useRef<PdfDocument | null>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [pageSize, setPageSize] = useState<{ width: number; height: number } | null>(null);
   const [pageCount, setPageCount] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [zoom, setZoom] = useState(1);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [textLayerStatus, setTextLayerStatus] = useState<"loading" | "ready" | "empty" | "error">("loading");
 
   useEffect(() => {
     const container = containerRef.current;
@@ -98,21 +110,39 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
     setPageCount(0);
     setPageNumber(1);
     setZoom(1);
+    setPageSize(null);
 
     const loadPdf = async () => {
       try {
         const pdfjs = await loadPdfJs();
         if (cancelled) return;
 
-        pdfjs.GlobalWorkerOptions.workerSrc = `${PDFJS_BASE}/pdf.worker.min.js`;
+        pdfjs.GlobalWorkerOptions.workerSrc = `${PDFJS_BASE}/pdf.worker.min.mjs`;
         loadingTask = pdfjs.getDocument({
           url: src,
-          // Fetch the whole file in one request. This is more reliable in mobile
-          // browsers and embedded WebViews with limited range-request support.
-          disableRange: true,
-          disableStream: true,
+          disableRange: false,
+          disableStream: false,
         });
-        const pdf = await loadingTask.promise;
+        let pdf: PdfDocument;
+        try {
+          pdf = await loadingTask.promise;
+        } catch (rangeError) {
+          if (cancelled) return;
+
+          // A single full-download retry keeps PDFs usable in clients where
+          // byte-range loading fails despite the proxy advertising support.
+          await loadingTask.destroy().catch(() => undefined);
+          loadingTask = pdfjs.getDocument({
+            url: src,
+            disableRange: true,
+            disableStream: true,
+          });
+          try {
+            pdf = await loadingTask.promise;
+          } catch {
+            throw rangeError;
+          }
+        }
         if (cancelled) {
           await loadingTask.destroy();
           return;
@@ -137,10 +167,14 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
   useEffect(() => {
     const pdf = documentRef.current;
     const canvas = canvasRef.current;
-    if (status !== "ready" || !pdf || !canvas || !containerWidth) return;
+    const textLayerContainer = textLayerRef.current;
+    if (status !== "ready" || !pdf || !canvas || !textLayerContainer || !containerWidth) return;
 
     let cancelled = false;
     let renderTask: PdfRenderTask | null = null;
+    let textLayer: PdfTextLayer | null = null;
+    setTextLayerStatus("loading");
+    textLayerContainer.replaceChildren();
 
     const renderPage = async () => {
       try {
@@ -150,14 +184,17 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
         const initialViewport = page.getViewport({ scale: 1 });
         const fitScale = Math.min(1, (containerWidth - 24) / initialViewport.width);
         const viewport = page.getViewport({ scale: fitScale * zoom });
+        const pageWidth = Math.floor(viewport.width);
+        const pageHeight = Math.floor(viewport.height);
         const outputScale = Math.min(window.devicePixelRatio || 1, 2);
         const context = canvas.getContext("2d");
         if (!context) throw new Error("Canvas is unavailable");
 
         canvas.width = Math.floor(viewport.width * outputScale);
         canvas.height = Math.floor(viewport.height * outputScale);
-        canvas.style.width = `${Math.floor(viewport.width)}px`;
-        canvas.style.height = `${Math.floor(viewport.height)}px`;
+        canvas.style.width = `${pageWidth}px`;
+        canvas.style.height = `${pageHeight}px`;
+        setPageSize({ width: pageWidth, height: pageHeight });
 
         renderTask = page.render({
           canvas,
@@ -165,7 +202,35 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
           viewport,
           transform: outputScale === 1 ? undefined : [outputScale, 0, 0, outputScale, 0, 0],
         });
-        await renderTask.promise;
+
+        const textLayerPromise = page.getTextContent().then(async (textContentValue) => {
+          if (cancelled) return;
+          const textContent = textContentValue as PdfTextContent;
+          const hasUsableText = textContent.items?.some(
+            (item) => typeof item.str === "string" && item.str.trim().length > 0,
+          );
+          if (!hasUsableText) {
+            setTextLayerStatus("empty");
+            return;
+          }
+          textLayerContainer.style.setProperty("--total-scale-factor", String(viewport.scale));
+          textLayer = new (await loadPdfJs()).TextLayer({
+            textContentSource: textContent,
+            container: textLayerContainer,
+            viewport,
+          });
+          textLayerContainer.style.width = `${pageWidth}px`;
+          textLayerContainer.style.height = `${pageHeight}px`;
+          await textLayer.render();
+          if (!cancelled) setTextLayerStatus("ready");
+        }).catch(() => {
+          if (!cancelled) {
+            textLayerContainer.replaceChildren();
+            setTextLayerStatus("error");
+          }
+        });
+
+        await Promise.all([renderTask.promise, textLayerPromise]);
       } catch (error) {
         if (!cancelled && (error as { name?: string }).name !== "RenderingCancelledException") {
           setStatus("error");
@@ -177,13 +242,14 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
     return () => {
       cancelled = true;
       renderTask?.cancel();
+      textLayer?.cancel();
     };
   }, [containerWidth, pageNumber, status, zoom]);
 
   if (status === "error") {
     return (
       <div className="rounded-2xl bg-palette-cream p-6 text-center text-sm text-palette-earth dark:bg-palette-deep dark:text-palette-cream/80" role="alert">
-        This PDF could not be displayed here. Use the Download PDF or Open in new tab buttons above.
+        This PDF could not be displayed here. Please try again later or return to browse.
       </div>
     );
   }
@@ -246,11 +312,32 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
             Loading {title}…
           </div>
         )}
-        <canvas
-          ref={canvasRef}
-          aria-label={`${title}, page ${pageNumber}`}
-          className={status === "ready" ? "mx-auto block shadow-lg" : "hidden"}
-        />
+        {status === "ready" ? (
+          <>
+            <div
+              className="relative mx-auto shadow-lg"
+              style={pageSize ? { width: pageSize.width, height: pageSize.height } : undefined}
+            >
+              <canvas
+                ref={canvasRef}
+                aria-label={`${title}, page ${pageNumber}`}
+                className="block"
+              />
+              <div ref={textLayerRef} className="pdf-text-layer" aria-label={`${title}, selectable text`} />
+            </div>
+            {textLayerStatus === "empty" ? (
+              <p className="mx-auto mt-3 max-w-2xl text-center text-xs text-palette-earth/75 dark:text-palette-cream/65" role="status">
+                This page has no selectable text layer. OCR is needed to make its text searchable.
+              </p>
+            ) : textLayerStatus === "error" ? (
+              <p className="mx-auto mt-3 max-w-2xl text-center text-xs text-palette-earth/75 dark:text-palette-cream/65" role="status">
+                Selectable text could not be prepared for this page.
+              </p>
+            ) : null}
+          </>
+        ) : (
+          <canvas ref={canvasRef} className="hidden" aria-hidden="true" />
+        )}
       </div>
     </div>
   );

@@ -16,11 +16,19 @@ export function PaperCard({
     >
       <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-palette-green via-palette-gold to-palette-rust opacity-75 transition group-hover:h-1.5" />
       <div className="mb-5 flex items-center justify-between gap-3 pt-1 text-xs text-palette-earth/80 dark:text-palette-cream/65">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-palette-gold/20 px-3 py-1.5 font-semibold text-palette-earth dark:text-palette-gold">
-          <Calendar className="h-3.5 w-3.5" /> {paper.year}
-        </span>
+        {paper.sequence_number != null ? (
+          <span className="rounded-full bg-palette-gold/20 px-3 py-1.5 font-semibold text-palette-earth dark:text-palette-gold">
+            Paper {paper.sequence_number}
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-palette-gold/20 px-3 py-1.5 font-semibold text-palette-earth dark:text-palette-gold">
+            <Calendar className="h-3.5 w-3.5" /> {paper.year ?? "Year unknown"}
+          </span>
+        )}
         {semester ? <span className="rounded-full bg-palette-green/10 px-3 py-1.5 dark:bg-palette-deep/45">Semester {semester.number}</span> : null}
       </div>
+
+      {(paper.category ?? (paper.subject_id ? "DSC" : null)) ? <span className="mb-3 w-fit rounded-full bg-palette-green/10 px-3 py-1 text-xs font-semibold text-palette-earth dark:bg-palette-deep/50 dark:text-palette-gold">{paper.category ?? "DSC"}</span> : null}
 
       <h3 className="flex-1 text-lg font-semibold leading-snug text-palette-deep dark:text-palette-cream">{paper.title}</h3>
 
