@@ -9,6 +9,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
+import { BotanySemesterOneTopicSearch } from "@/components/topics/topic-search";
 import { BROWSE_FILTERS, getHomeData, type BrowseFilterValue } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
@@ -135,6 +136,10 @@ export default async function Home() {
             <StudyNook />
           </div>
         </div>
+      </AnimatedSection>
+
+      <AnimatedSection delay={0.04}>
+        <BotanySemesterOneTopicSearch />
       </AnimatedSection>
 
       <AnimatedSection delay={0.08}>
