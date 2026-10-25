@@ -63,7 +63,7 @@ export default async function BrowsePage({
               <PaperCard
                 key={paper.id}
                 paper={paper}
-                semester={semesterMap.get(paper.semester_id)}
+                semester={paper.semester_id == null ? undefined : semesterMap.get(paper.semester_id)}
               />
             ))}
           </div>
