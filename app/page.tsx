@@ -9,7 +9,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
-import { BROWSE_FILTERS, getHomeData } from "@/lib/supabase/queries";
+import { BROWSE_FILTERS, getHomeData, type BrowseFilterValue } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +20,13 @@ const subjectAccents = [
   "bg-palette-rust text-palette-cream",
   "bg-palette-deep text-palette-gold",
 ];
+
+const categoryDescriptions: Partial<Record<BrowseFilterValue, string>> = {
+  vac: "Value Addition Course",
+  aec: "Ability Enhancement Course",
+  sec: "Skill Enhancement Course",
+  ge: "Generic Elective",
+};
 
 // Quotations are kept here with their work and a source trail so wording,
 // translation, and attribution can be checked without a runtime service.
@@ -172,9 +179,11 @@ export default async function Home() {
               </span>
               <span className="min-w-0 flex-1">
                 <span className="block text-base font-semibold">{filter.label}</span>
-                <span className="mt-1 block text-xs text-palette-earth/75 dark:text-palette-cream/65">
-                  {filter.value === "ge" ? "Generic Elective" : "Search this category"}
-                </span>
+                {categoryDescriptions[filter.value] && (
+                  <span className="mt-1 block text-xs text-palette-earth/75 dark:text-palette-cream/65">
+                    {categoryDescriptions[filter.value]}
+                  </span>
+                )}
               </span>
               <ArrowUpRight className="h-4 w-4 shrink-0 text-palette-earth transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 dark:text-palette-gold" />
             </Link>

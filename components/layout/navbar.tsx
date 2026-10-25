@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GraduationCap } from "lucide-react";
+import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 const navItems = [
@@ -13,9 +13,14 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-palette-gold/25 bg-palette-deep/95 text-palette-cream shadow-lg shadow-palette-deep/10 backdrop-blur-lg">
       <div className="mx-auto flex h-[4.5rem] w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="group flex items-center gap-3 text-lg font-semibold tracking-tight text-palette-cream">
-          <span className="rounded-xl bg-palette-gold p-2 text-palette-deep transition duration-300 group-hover:-rotate-6 group-hover:scale-105">
-            <GraduationCap className="h-5 w-5" />
-          </span>
+          <Image
+            src="/du-pyq-logo.png"
+            alt=""
+            width={48}
+            height={48}
+            priority
+            className="h-11 w-11 shrink-0 object-contain transition duration-300 group-hover:scale-105"
+          />
           <span>DU <span className="text-palette-gold">PYQ HUB</span></span>
         </Link>
 
