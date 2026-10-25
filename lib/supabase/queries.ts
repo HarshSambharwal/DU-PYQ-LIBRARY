@@ -4,13 +4,31 @@ export type Course = { id: number; name: string };
 export type Semester = { id: number; number: number; course_id: number };
 export type Subject = { id: number; name: string };
 export type SemesterSubject = Subject & { semester_id: number };
+export const PAPER_CATEGORIES = ["DSC", "DSE", "VAC", "SEC", "AEC", "GE", "Back Paper"] as const;
+export type PaperCategory = (typeof PAPER_CATEGORIES)[number];
+export const BROWSE_FILTERS = [
+  { value: "botany", label: "Botany", category: "DSC", subjectName: "Botany", sourceLabels: ["Botany", "DSC Botany"] },
+  { value: "zoology", label: "Zoology", category: "DSC", subjectName: "Zoology", sourceLabels: ["Zoology", "DSC zoo"] },
+  { value: "chemistry", label: "Chemistry", category: "DSC", subjectName: "Chemistry", sourceLabels: ["Chemistry", "DSC CHEM"] },
+  { value: "dse-botany", label: "DSE Botany", category: "DSE", subjectName: "Botany", sourceLabels: ["DSE Botany", "Botany"] },
+  { value: "dse-zoology", label: "DSE Zoology", category: "DSE", subjectName: "Zoology", sourceLabels: ["DSE Zoology", "Zoology"] },
+  { value: "dse-chemistry", label: "DSE Chemistry", category: "DSE", subjectName: "Chemistry", sourceLabels: ["DSE Chemistry", "DSE chem", "DSE CHEM", "Chemistry"] },
+  { value: "vac", label: "VAC", category: "VAC" },
+  { value: "aec", label: "AEC", category: "AEC" },
+  { value: "sec", label: "SEC", category: "SEC" },
+  { value: "ge", label: "GE", category: "GE" },
+] as const;
+export type BrowseFilterValue = (typeof BROWSE_FILTERS)[number]["value"];
 export type Paper = {
   id: number;
   title: string;
-  year: number;
+  sequence_number: number | null;
+  year: number | null;
   pdf_url: string;
-  subject_id: number;
-  semester_id: number;
+  subject_id: number | null;
+  semester_id: number | null;
+  category: PaperCategory | null;
+  source_subject_label: string | null;
 };
 
 type BrowseResult = {
@@ -61,7 +79,7 @@ export async function getHomeData(): Promise<{
 export async function getBrowseFilters(): Promise<{
   courses: Course[];
   semesters: Semester[];
-  subjects: SemesterSubject[];
+  filters: typeof BROWSE_FILTERS;
 }> {
   const supabase = getSupabaseClient();
 
@@ -69,20 +87,19 @@ export async function getBrowseFilters(): Promise<{
     return {
       courses: [],
       semesters: [],
-      subjects: [],
+      filters: BROWSE_FILTERS,
     };
   }
 
-  const [courses, semesters, subjects] = await Promise.all([
+  const [courses, semesters] = await Promise.all([
     supabase.from("courses").select("id,name").order("name"),
     supabase.from("semester").select("id,number,course_id").order("number"),
-    supabase.from("subjects").select("id,name,semester_id").order("name"),
   ]);
 
   return {
     courses: (courses.data ?? []) as Course[],
     semesters: (semesters.data ?? []) as Semester[],
-    subjects: (subjects.data ?? []) as SemesterSubject[],
+    filters: BROWSE_FILTERS,
   };
 }
 
@@ -91,12 +108,29 @@ export async function getPapers(params: {
   courseId?: number;
   semesterId?: number;
   subjectId?: number;
+  browseFilter?: BrowseFilterValue;
+  category?: PaperCategory;
 }): Promise<BrowseResult> {
   const supabase = getSupabaseClient();
+  const search = params.search?.trim();
 
   if (!supabase) {
     return {
       papers: [],
+      paperCount: 0,
+      subjectMap: new Map<number, Subject>(),
+      semesterMap: new Map<number, Semester>(),
+    };
+  }
+
+  const hasFilters = Boolean(
+    search || params.courseId || params.semesterId || params.subjectId || params.browseFilter || params.category,
+  );
+  if (!hasFilters) {
+    const { count } = await supabase.from("papers").select("id", { count: "exact", head: true });
+    return {
+      papers: [],
+      paperCount: count ?? 0,
       subjectMap: new Map<number, Subject>(),
       semesterMap: new Map<number, Semester>(),
     };
@@ -112,6 +146,7 @@ export async function getPapers(params: {
     if (!semesterIdsForCourse.length) {
       return {
         papers: [],
+        paperCount: 0,
         subjectMap: new Map<number, Subject>(),
         semesterMap: new Map<number, Semester>(),
       };
@@ -120,19 +155,63 @@ export async function getPapers(params: {
 
   let query = supabase
     .from("papers")
-    .select("id,title,year,pdf_url,subject_id,semester_id")
-    .order("year", { ascending: false });
+    .select("id,title,sequence_number,year,pdf_url,subject_id,semester_id,category,source_subject_label");
 
-  if (params.search) query = query.ilike("title", `%${params.search}%`);
+  const browseFilter = BROWSE_FILTERS.find((item) => item.value === params.browseFilter);
+  let browseSubjectIds: number[] = [];
+  if (browseFilter && "subjectName" in browseFilter) {
+    const { data } = await supabase
+      .from("subjects")
+      .select("id")
+      .ilike("name", browseFilter.subjectName);
+    browseSubjectIds = (data ?? []).map((subject) => subject.id as number);
+  }
+
+  const sequenceOrderedFilter = browseFilter && ["VAC", "SEC", "AEC"].includes(browseFilter.category);
+  if (search || sequenceOrderedFilter || ["VAC", "SEC", "AEC"].includes(params.category ?? "")) {
+    query = query
+      .order("sequence_number", { ascending: true, nullsFirst: false })
+      .order("year", { ascending: false, nullsFirst: false })
+      .order("title", { ascending: true });
+  } else {
+    query = query.order("year", { ascending: false, nullsFirst: false });
+  }
+
+  if (search) query = query.ilike("title", `%${search}%`);
   if (params.semesterId) query = query.eq("semester_id", params.semesterId);
   if (params.subjectId) query = query.eq("subject_id", params.subjectId);
+  if (browseFilter && "subjectName" in browseFilter) {
+    const branches: string[] = [];
+    if (browseSubjectIds.length) {
+      branches.push(`and(category.eq.${browseFilter.category},subject_id.in.(${browseSubjectIds.join(",")}))`);
+      if (browseFilter.category === "DSC") {
+        branches.push(`and(category.is.null,subject_id.in.(${browseSubjectIds.join(",")}))`);
+      }
+    }
+    for (const sourceLabel of browseFilter.sourceLabels) {
+      const quotedLabel = `"${sourceLabel.replaceAll('"', '\\"')}"`;
+      branches.push(`and(category.eq.${browseFilter.category},source_subject_label.eq.${quotedLabel})`);
+      if (browseFilter.category === "DSC") {
+        branches.push(`and(category.is.null,source_subject_label.eq.${quotedLabel})`);
+      }
+    }
+    query = query.or(branches.join(","));
+  } else if (browseFilter?.value === "ge") {
+    query = query.or('category.eq.GE,source_subject_label.eq.GE,source_subject_label.eq."Generic Elective"');
+  } else if (browseFilter) {
+    query = query.eq("category", browseFilter.category);
+  } else if (params.category === "DSC") {
+    query = query.or("category.eq.DSC,and(category.is.null,subject_id.not.is.null)");
+  } else if (params.category) {
+    query = query.eq("category", params.category);
+  }
   if (semesterIdsForCourse) query = query.in("semester_id", semesterIdsForCourse);
 
   const papersResult = await query;
   const papers = (papersResult.data ?? []) as Paper[];
 
-  const subjectIds = Array.from(new Set(papers.map((paper) => paper.subject_id)));
-  const semesterIds = Array.from(new Set(papers.map((paper) => paper.semester_id)));
+  const subjectIds = Array.from(new Set(papers.flatMap((paper) => paper.subject_id ? [paper.subject_id] : [])));
+  const semesterIds = Array.from(new Set(papers.flatMap((paper) => paper.semester_id ? [paper.semester_id] : [])));
 
   const [subjectsResult, semestersResult] = await Promise.all([
     subjectIds.length
@@ -145,6 +224,7 @@ export async function getPapers(params: {
 
   return {
     papers,
+    paperCount: papers.length,
     subjectMap: new Map(
       ((subjectsResult.data ?? []) as Subject[]).map((subject) => [subject.id, subject]),
     ),

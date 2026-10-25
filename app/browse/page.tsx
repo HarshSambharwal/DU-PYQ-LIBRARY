@@ -3,7 +3,7 @@ import { ArrowUpRight, SearchX } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
 import { BrowseFilters } from "@/components/papers/browse-filters";
 import { PaperCard } from "@/components/papers/paper-card";
-import { getBrowseFilters, getPapers } from "@/lib/supabase/queries";
+import { BROWSE_FILTERS, getBrowseFilters, getPapers } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +11,7 @@ type BrowseSearchParams = {
   q?: string;
   course?: string;
   semester?: string;
-  subject?: string;
+  filter?: string;
 };
 
 export default async function BrowsePage({
@@ -20,13 +20,13 @@ export default async function BrowsePage({
   searchParams: Promise<BrowseSearchParams>;
 }) {
   const resolvedSearchParams = await searchParams;
-  const { courses, semesters, subjects } = await getBrowseFilters();
-
-  const { papers, semesterMap } = await getPapers({
+  const { courses, semesters, filters } = await getBrowseFilters();
+  const selectedFilter = BROWSE_FILTERS.find((filter) => filter.value === resolvedSearchParams.filter);
+  const { papers, paperCount, semesterMap } = await getPapers({
     search: resolvedSearchParams.q,
     courseId: resolvedSearchParams.course ? Number(resolvedSearchParams.course) : undefined,
     semesterId: resolvedSearchParams.semester ? Number(resolvedSearchParams.semester) : undefined,
-    subjectId: resolvedSearchParams.subject ? Number(resolvedSearchParams.subject) : undefined,
+    browseFilter: selectedFilter?.value,
   });
 
   return (
@@ -47,7 +47,7 @@ export default async function BrowsePage({
       </AnimatedSection>
 
       <AnimatedSection delay={0.08}>
-        <BrowseFilters courses={courses} semesters={semesters} subjects={subjects} />
+        <BrowseFilters courses={courses} semesters={semesters} filters={filters} />
       </AnimatedSection>
 
       <AnimatedSection delay={0.14}>

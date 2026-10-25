@@ -3,16 +3,16 @@
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { Course, Semester, SemesterSubject } from "@/lib/supabase/queries";
+import type { BROWSE_FILTERS, Course, Semester } from "@/lib/supabase/queries";
 
 export function BrowseFilters({
   courses,
   semesters,
-  subjects,
+  filters,
 }: {
   courses: Course[];
   semesters: Semester[];
-  subjects: SemesterSubject[];
+  filters: typeof BROWSE_FILTERS;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -22,17 +22,12 @@ export function BrowseFilters({
 
   const selectedCourse = searchParams.get("course") ?? "";
   const selectedSemester = searchParams.get("semester") ?? "";
-  const selectedSubject = searchParams.get("subject") ?? "";
+  const selectedFilter = searchParams.get("filter") ?? "";
 
   const visibleSemesters = useMemo(() => {
     if (!selectedCourse) return semesters;
     return semesters.filter((semester) => String(semester.course_id) === selectedCourse);
   }, [semesters, selectedCourse]);
-
-  const visibleSubjects = useMemo(() => {
-    if (!selectedSemester) return subjects;
-    return subjects.filter((subject) => String(subject.semester_id) === selectedSemester);
-  }, [subjects, selectedSemester]);
 
   const update = (updates: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -42,7 +37,8 @@ export function BrowseFilters({
       else params.delete(key);
     });
 
-    router.push(`${pathname}?${params.toString()}`);
+    const query = params.toString();
+    router.push(query ? `${pathname}?${query}` : pathname);
   };
 
   return (
@@ -57,13 +53,13 @@ export function BrowseFilters({
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             onKeyDown={(event) => event.key === "Enter" && update({ q: search })}
-            placeholder="Search papers by title..."
-            aria-label="Search papers by title"
+            placeholder="Search by paper or subject name..."
+            aria-label="Search by paper or subject name"
             className="h-12 w-full rounded-xl border border-palette-green/15 bg-palette-cream pl-10 pr-4 text-sm text-palette-deep outline-none transition placeholder:text-palette-earth/65 focus:border-palette-gold focus:ring-2 focus:ring-palette-gold/40"
           />
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <select
             value={selectedCourse}
             aria-label="Filter by course"
@@ -89,14 +85,16 @@ export function BrowseFilters({
           </select>
 
           <select
-            value={selectedSubject}
-            aria-label="Filter by subject"
-            onChange={(event) => update({ subject: event.target.value })}
+            value={selectedFilter}
+            aria-label="Filter by subject or category"
+            onChange={(event) => update({ filter: event.target.value, category: "", subject: "" })}
             className="h-12 rounded-xl border border-palette-cream/15 bg-palette-cream px-3 text-sm text-palette-deep outline-none ring-palette-gold/40 transition focus:border-palette-gold focus:ring-2"
           >
-            <option value="">All Subjects</option>
-            {visibleSubjects.map((subject) => (
-              <option key={subject.id} value={subject.id}>{subject.name}</option>
+            <option value="">All Subjects and Categories</option>
+            {filters.map((filter) => (
+              <option key={filter.value} value={filter.value}>
+                {filter.value === "ge" ? "GE (Generic Elective)" : filter.label}
+              </option>
             ))}
           </select>
         </div>
