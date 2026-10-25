@@ -33,6 +33,7 @@ export type Paper = {
 
 type BrowseResult = {
   papers: Paper[];
+  paperCount: number;
   subjectMap: Map<number, Subject>;
   semesterMap: Map<number, Semester>;
 };
