@@ -8,6 +8,9 @@ import { Analytics } from "@vercel/analytics/next";
 export const metadata: Metadata = {
   title: "DU PYQ HUB",
   description: "Delhi University Previous Year Question Papers platform.",
+  other: {
+  "google-site-verification": "-sIDktU5fq2gaj6tGxuIfjYkR4reMQeh8qmQDbNx4Hk",
+},
 };
 
 export default function RootLayout({
