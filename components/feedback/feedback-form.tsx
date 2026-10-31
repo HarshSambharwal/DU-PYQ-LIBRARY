@@ -26,7 +26,7 @@ export function FeedbackForm() {
       subject.trim() ? `Subject: ${subject.trim()}` : "",
     ].filter(Boolean).join("\n");
 
-    return `NEW FEEDBACK — DU PYQ HUB\n\nHello DU PYQ HUB Team!\n\nFeedback Category: ${typeLabel}${optionalFields ? `\n${optionalFields}` : ""}\n\nDescription:\n${description.trim()}\n\nThank you for taking the time to help us improve DU PYQ HUB. Your feedback helps us make the archive more useful for students.`;
+    return `*NEW FEEDBACK — DU PYQ HUB*\n\nHello DU PYQ HUB Team!\n\nFeedback Category: ${typeLabel}${optionalFields ? `\n${optionalFields}` : ""}\n\nDescription:\n${description.trim()}\n\nThank you for taking the time to help us improve DU PYQ HUB. Your feedback helps us make the archive more useful for students.`;
   }, [description, feedbackType, semester, subject]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
