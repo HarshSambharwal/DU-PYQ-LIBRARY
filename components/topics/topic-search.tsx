@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useMemo, useState } from "react";
 import { ArrowUpRight, Search, Sparkles } from "lucide-react";
+import posthog from "posthog-js";
 import { TOPIC_SEARCH_CATALOG } from "@/lib/topic-search/botany-sem1-index";
 
 type TopicSubjectKey = keyof typeof TOPIC_SEARCH_CATALOG;
@@ -49,6 +50,11 @@ export function BotanySemesterOneTopicSearch() {
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    posthog.capture("topic_search_submitted", {
+      semester: selectedSemester,
+      subject: selectedSubjectKey,
+      topic_id: selectedTopicId,
+    });
     setSearchedTopicId(selectedTopicId);
   }
 
@@ -182,6 +188,10 @@ export function BotanySemesterOneTopicSearch() {
                         <span>{paper.title} · {paper.year} · Question {question.questionRef} · PDF page {question.page}</span>
                         <Link
                           href={`/papers/${paper.id}`}
+                          onClick={() => posthog.capture("paper_opened", {
+                            paper_id: paper.id,
+                            source: "topic_search",
+                          })}
                           className="inline-flex min-h-10 items-center gap-1 rounded-lg px-2 font-semibold text-palette-gold hover:text-palette-cream focus-visible:outline-palette-gold"
                         >
                           Open paper <ArrowUpRight aria-hidden="true" className="h-3.5 w-3.5" />

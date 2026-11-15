@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 
 const PDFJS_BASE = "/vendor/pdfjs-legacy";
@@ -246,6 +247,15 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
     };
   }, [containerWidth, pageNumber, status, zoom]);
 
+  function navigatePage(direction: "previous" | "next") {
+    const nextPage = direction === "previous" ? pageNumber - 1 : pageNumber + 1;
+    posthog.capture("pdf_page_navigated", {
+      direction,
+      page_number: nextPage,
+    });
+    setPageNumber(nextPage);
+  }
+
   if (status === "error") {
     return (
       <div className="rounded-2xl bg-palette-cream p-6 text-center text-sm text-palette-earth dark:bg-palette-deep dark:text-palette-cream/80" role="alert">
@@ -260,7 +270,7 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setPageNumber((current) => Math.max(1, current - 1))}
+            onClick={() => navigatePage("previous")}
             disabled={status !== "ready" || pageNumber <= 1}
             aria-label="Previous page"
             className="rounded-lg border border-palette-green/20 bg-white p-2 text-palette-deep disabled:opacity-40 dark:border-palette-gold/20 dark:bg-palette-green dark:text-palette-cream"
@@ -272,7 +282,7 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
           </span>
           <button
             type="button"
-            onClick={() => setPageNumber((current) => Math.min(pageCount, current + 1))}
+            onClick={() => navigatePage("next")}
             disabled={status !== "ready" || pageNumber >= pageCount}
             aria-label="Next page"
             className="rounded-lg border border-palette-green/20 bg-white p-2 text-palette-deep disabled:opacity-40 dark:border-palette-gold/20 dark:bg-palette-green dark:text-palette-cream"

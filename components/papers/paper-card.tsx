@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Calendar } from "lucide-react";
+import posthog from "posthog-js";
 import type { Paper, Semester } from "@/lib/supabase/queries";
 
 export function PaperCard({
@@ -12,6 +15,12 @@ export function PaperCard({
   return (
     <Link
       href={`/papers/${paper.id}`}
+      onClick={() => posthog.capture("paper_opened", {
+        paper_id: paper.id,
+        paper_category: paper.category ?? (paper.subject_id ? "DSC" : undefined),
+        semester_number: semester?.number,
+        source: "browse_results",
+      })}
       className="group relative isolate flex h-full flex-col overflow-hidden rounded-2xl border border-palette-green/20 bg-white/85 p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-palette-gold/70 hover:shadow-xl dark:border-palette-gold/15 dark:bg-palette-green/55"
     >
       <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-palette-green via-palette-gold to-palette-rust opacity-75 transition group-hover:h-1.5" />

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import posthog from "posthog-js";
 import type { BROWSE_FILTERS, Course, Semester } from "@/lib/supabase/queries";
 
 export function BrowseFilters({
@@ -35,6 +36,13 @@ export function BrowseFilters({
     Object.entries(updates).forEach(([key, value]) => {
       if (value) params.set(key, value);
       else params.delete(key);
+    });
+
+    posthog.capture("paper_browse_filtered", {
+      has_search_query: Boolean(updates.q ?? searchParams.get("q")),
+      course_id: (updates.course ?? selectedCourse) || undefined,
+      semester_id: (updates.semester ?? selectedSemester) || undefined,
+      filter: (updates.filter ?? selectedFilter) || undefined,
     });
 
     const query = params.toString();
