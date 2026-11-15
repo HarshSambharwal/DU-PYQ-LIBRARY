@@ -1,3 +1,5 @@
+import { SeverityNumber } from "@opentelemetry/api-logs";
+import { posthogAppLogger, posthogLogProvider } from "@/instrumentation";
 import { getPaperPdfUrlById } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +12,20 @@ export async function GET(
   const pdfUrl = await getPaperPdfUrlById(id);
 
   if (!pdfUrl) {
+    posthogAppLogger?.emit({
+      body: "pdf_proxy_paper_not_found",
+      severityNumber: SeverityNumber.WARN,
+      attributes: { paper_id: id },
+    });
+    await posthogLogProvider?.forceFlush().catch(() => {});
     return new Response("Paper not found", { status: 404 });
   }
+
+  posthogAppLogger?.emit({
+    body: "pdf_proxy_fetch_started",
+    severityNumber: SeverityNumber.INFO,
+    attributes: { paper_id: id },
+  });
 
   const requestHeaders = new Headers();
   const range = request.headers.get("range");
@@ -23,6 +37,12 @@ export async function GET(
   });
 
   if (!pdfResponse.ok || !pdfResponse.body) {
+    posthogAppLogger?.emit({
+      body: "pdf_proxy_fetch_failed",
+      severityNumber: SeverityNumber.WARN,
+      attributes: { paper_id: id, upstream_status: pdfResponse.status },
+    });
+    await posthogLogProvider?.forceFlush().catch(() => {});
     return new Response("PDF could not be loaded", { status: 502 });
   }
 
@@ -38,6 +58,7 @@ export async function GET(
     if (value) responseHeaders.set(header, value);
   }
 
+  await posthogLogProvider?.forceFlush().catch(() => {});
   return new Response(pdfResponse.body, {
     status: pdfResponse.status,
     headers: responseHeaders,

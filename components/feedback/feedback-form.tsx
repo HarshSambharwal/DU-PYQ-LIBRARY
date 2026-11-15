@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useMemo, useState } from "react";
+import posthog from "posthog-js";
 
 const FEEDBACK_TYPES = [
   ["missing_paper", "Missing paper"],
@@ -48,6 +49,12 @@ export function FeedbackForm() {
       setError("The feedback message could not be prepared correctly. Please try again.");
       return;
     }
+
+    posthog.capture("feedback_handoff_started", {
+      feedback_type: feedbackType,
+      has_semester: Boolean(semester),
+      has_subject: Boolean(subject.trim()),
+    });
     window.location.assign(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`);
   }
 
