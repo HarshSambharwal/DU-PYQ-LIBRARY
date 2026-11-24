@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Share2, ZoomIn, ZoomOut } from "lucide-react";
 import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 
@@ -89,6 +89,7 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
   const [zoom, setZoom] = useState(1);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [textLayerStatus, setTextLayerStatus] = useState<"loading" | "ready" | "empty" | "error">("loading");
+  const [shareFeedback, setShareFeedback] = useState<"copied" | "error" | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -256,6 +257,32 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
     setPageNumber(nextPage);
   }
 
+  async function handleShare() {
+    // Share the paper's website page, never the underlying Supabase PDF URL.
+    const url = `${window.location.origin}${window.location.pathname}`;
+    setShareFeedback(null);
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: `View this question paper on DU PYQ Hub: ${title}`, url });
+        posthog.capture("paper_shared", { method: "native" });
+        return;
+      } catch (error) {
+        // Closing the native share sheet is not a failure and should not copy a link.
+        if ((error as { name?: string }).name === "AbortError") return;
+        // Fall back to copying the paper link if native sharing is unavailable.
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareFeedback("copied");
+      posthog.capture("paper_shared", { method: "copy_link" });
+    } catch {
+      setShareFeedback("error");
+    }
+  }
+
   if (status === "error") {
     return (
       <div className="rounded-2xl bg-palette-cream p-6 text-center text-sm text-palette-earth dark:bg-palette-deep dark:text-palette-cream/80" role="alert">
@@ -313,8 +340,32 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
           >
             <ZoomIn className="h-4 w-4" />
           </button>
+          <a
+            href={`${src}?download=1`}
+            download
+            aria-label={`Download ${title} as PDF`}
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg bg-palette-gold px-3 py-2 text-sm font-semibold text-palette-deep transition hover:bg-[#E8C65F]"
+          >
+            <Download className="h-4 w-4" aria-hidden="true" />
+            <span>Download PDF</span>
+          </a>
+          <button
+            type="button"
+            onClick={() => void handleShare()}
+            aria-label={`Share ${title}`}
+            className="inline-flex min-h-9 items-center justify-center gap-2 rounded-lg border border-palette-green/20 bg-white px-3 py-2 text-sm font-semibold text-palette-deep transition hover:bg-palette-gold/20 dark:border-palette-gold/30 dark:bg-palette-green dark:text-palette-cream"
+          >
+            <Share2 className="h-4 w-4" aria-hidden="true" />
+            <span>{shareFeedback === "copied" ? "Link copied!" : "Share Paper"}</span>
+          </button>
         </div>
       </div>
+
+      {shareFeedback === "error" && (
+        <p role="status" className="px-4 py-2 text-sm text-palette-earth dark:text-palette-cream">
+          Couldn't copy the link automatically. Please copy this page's URL from your browser's address bar.
+        </p>
+      )}
 
       <div ref={containerRef} className="max-h-[78vh] overflow-auto p-3 sm:p-4">
         {status === "loading" && (
