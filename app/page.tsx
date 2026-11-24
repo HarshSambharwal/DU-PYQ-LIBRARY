@@ -9,7 +9,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
-import { BotanySemesterOneTopicSearch } from "@/components/topics/topic-search";
+import { TopicSearch } from "@/components/topics/topic-search";
+import { readApprovedTopicSearch, readLocalExamCoverage, readSupabaseTopicSearch } from "@/lib/topic-search/approved-export";
 import { BROWSE_FILTERS, getHomeData, type BrowseFilterValue } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
@@ -89,7 +90,11 @@ function StudyNook() {
 }
 
 export default async function Home() {
-  const { stats } = await getHomeData();
+  const useDatabaseRelease = Boolean(process.env.TOPIC_SEARCH_SUPABASE_RELEASE);
+  const [{ stats }, approvedTopicCatalog] = await Promise.all([
+    getHomeData(), useDatabaseRelease ? readSupabaseTopicSearch()
+      : readLocalExamCoverage().then((coverage) => coverage ?? readApprovedTopicSearch()),
+  ]);
   const studyQuote = studyQuotes[Math.floor(Math.random() * studyQuotes.length)];
 
   return (
@@ -139,7 +144,7 @@ export default async function Home() {
       </AnimatedSection>
 
       <AnimatedSection delay={0.04}>
-        <BotanySemesterOneTopicSearch />
+        <TopicSearch approvedCatalog={approvedTopicCatalog} databaseRelease={useDatabaseRelease} />
       </AnimatedSection>
 
       <AnimatedSection delay={0.08}>

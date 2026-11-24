@@ -1,0 +1,17 @@
+{
+  "1/Botany/DSC": [167,172,177],
+  "1/Chemistry/DSC": [182,187,192],
+  "1/Zoology/DSC": [197,202,207,212,328],
+  "3/Botany/DSC": [261,265,330],
+  "3/Botany/DSE": [370,372],
+  "3/Chemistry/DSC": [269,273,277,281],
+  "3/Chemistry/DSE": [334,336],
+  "3/Zoology/DSC": [285,288,332],
+  "3/Zoology/DSE": [253,257,291],
+  "5/Botany/DSC": [308,350,352,354,390,392],
+  "5/Botany/DSE": [316,374],
+  "5/Chemistry/DSC": [310,376],
+  "5/Chemistry/DSE": [366,368],
+  "5/Zoology/DSC": [312,314],
+  "5/Zoology/DSE": [394,396]
+}
