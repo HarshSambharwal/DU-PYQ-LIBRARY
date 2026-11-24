@@ -5,7 +5,6 @@ import {
   BookOpen,
   Building2,
   FileCheck2,
-  Search,
   Sparkles,
 } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
@@ -115,21 +114,16 @@ export default async function Home() {
               Previous year papers, neatly arranged by course, semester, and subject. Spend less time searching and more time preparing.
             </p>
 
-            <form action="/browse" className="mt-7 flex flex-col gap-2 rounded-2xl border border-white/15 bg-white/10 p-2 backdrop-blur sm:flex-row">
-              <div className="relative min-w-0 flex-1">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-palette-earth" />
-                <input
-                  type="search"
-                  name="q"
-                  aria-label="Search by subject or paper title"
-                  placeholder="Search a subject or paper title"
-                  className="h-12 w-full rounded-xl border border-palette-green/15 bg-palette-cream pl-10 pr-4 text-sm text-palette-deep outline-none transition placeholder:text-palette-earth/70 focus:border-palette-gold focus:ring-2 focus:ring-palette-gold/40"
-                />
-              </div>
-              <button className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-palette-gold px-5 text-sm font-semibold text-palette-deep transition duration-200 hover:-translate-y-0.5 hover:bg-[#E8C65F]">
-                Search papers <ArrowRight className="h-4 w-4" />
-              </button>
-            </form>
+
+<Link
+  href="/browse"
+  className="mt-7 inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-palette-gold px-8 py-4 text-lg font-bold text-palette-deep shadow-lg transition duration-200 hover:-translate-y-0.5 hover:bg-[#E8C65F] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-palette-cream sm:w-auto"
+>
+  <BookOpen className="h-6 w-6" />
+  Browse Papers
+  <ArrowRight className="h-5 w-5" />
+</Link>
+
 
             <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-palette-cream/65">
               <span className="inline-flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-palette-gold" /> Course-wise archive</span>

@@ -103,9 +103,9 @@ export function TopicSearch({ approvedCatalog, databaseRelease = false }: {
   const catalog = approvedCatalog?.length ? approvedCatalog : fallbackCatalog;
   const first = catalog[0];
   const [selectedCourse, setSelectedCourse] = useState(first.courseName);
-  const [selectedSemester, setSelectedSemester] = useState(first.semesterId);
-  const [selectedSubject, setSelectedSubject] = useState(first.subjectName);
-  const [selectedCategory, setSelectedCategory] = useState(first.category);
+  const [selectedSemester, setSelectedSemester] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<"DSC" | "DSE" | "">("");
   const [selectedTopicId, setSelectedTopicId] = useState("");
   const [searchedTopicId, setSearchedTopicId] = useState("");
 
@@ -182,12 +182,10 @@ export function TopicSearch({ approvedCatalog, databaseRelease = false }: {
               id="topic-search-course"
               value={selectedCourse}
               onChange={(event) => {
-                const entry = catalog.find((item) => item.courseName === event.target.value);
-                if (!entry) return;
-                setSelectedCourse(entry.courseName);
-                setSelectedSemester(entry.semesterId);
-                setSelectedSubject(entry.subjectName);
-                setSelectedCategory(entry.category);
+                setSelectedCourse(event.target.value);
+                setSelectedSemester("");
+                setSelectedSubject("");
+                setSelectedCategory("");
                 clearResults();
               }}
               className="mt-1.5 h-11 w-full rounded-lg border border-palette-green/20 bg-palette-cream px-3 text-sm font-normal text-palette-deep outline-none focus:border-palette-gold focus:ring-2 focus:ring-palette-gold/40"
@@ -201,17 +199,14 @@ export function TopicSearch({ approvedCatalog, databaseRelease = false }: {
               id="topic-search-semester"
               value={selectedSemester}
               onChange={(event) => {
-                const nextSemester = event.target.value;
-                const nextEntries = courseEntries.filter((entry) => entry.semesterId === nextSemester);
-                const nextSubject = nextEntries[0]?.subjectName ?? "";
-                const nextCategory = nextEntries.find((entry) => entry.subjectName === nextSubject)?.category ?? "DSC";
-                setSelectedSemester(nextSemester);
-                setSelectedSubject(nextSubject);
-                setSelectedCategory(nextCategory);
+                setSelectedSemester(event.target.value);
+                setSelectedSubject("");
+                setSelectedCategory("");
                 clearResults();
               }}
               className="mt-1.5 h-11 w-full rounded-lg border border-palette-green/20 bg-palette-cream px-3 text-sm font-normal text-palette-deep outline-none focus:border-palette-gold focus:ring-2 focus:ring-palette-gold/40"
             >
+              <option value="">Select semester</option>
               {availableSemesters.map((semester) => (
                 <option key={semester.id} value={semester.id}>{semester.label}</option>
               ))}
@@ -224,14 +219,14 @@ export function TopicSearch({ approvedCatalog, databaseRelease = false }: {
               id="topic-search-subject"
               value={selectedSubject}
               onChange={(event) => {
-                const nextSubject = event.target.value;
-                const nextCategory = availableEntries.find((entry) => entry.subjectName === nextSubject)?.category ?? "DSC";
-                setSelectedSubject(nextSubject);
-                setSelectedCategory(nextCategory);
+                setSelectedSubject(event.target.value);
+                setSelectedCategory("");
                 clearResults();
               }}
-              className="mt-1.5 h-11 w-full rounded-lg border border-palette-green/20 bg-palette-cream px-3 text-sm font-normal text-palette-deep outline-none focus:border-palette-gold focus:ring-2 focus:ring-palette-gold/40"
+              disabled={!selectedSemester}
+              className="mt-1.5 h-11 w-full rounded-lg border border-palette-green/20 bg-palette-cream px-3 text-sm font-normal text-palette-deep outline-none focus:border-palette-gold focus:ring-2 focus:ring-palette-gold/40 disabled:opacity-60"
             >
+              <option value="">Select subject</option>
               {availableSubjects.map((subject) => (
                 <option key={subject} value={subject}>{subject}</option>
               ))}
@@ -244,11 +239,13 @@ export function TopicSearch({ approvedCatalog, databaseRelease = false }: {
               id="topic-search-category"
               value={selectedCategory}
               onChange={(event) => {
-                setSelectedCategory(event.target.value as "DSC" | "DSE");
+                setSelectedCategory(event.target.value as "DSC" | "DSE" | "");
                 clearResults();
               }}
-              className="mt-1.5 h-11 w-full rounded-lg border border-palette-green/20 bg-palette-cream px-3 text-sm font-normal text-palette-deep outline-none focus:border-palette-gold focus:ring-2 focus:ring-palette-gold/40"
+              disabled={!selectedSubject}
+              className="mt-1.5 h-11 w-full rounded-lg border border-palette-green/20 bg-palette-cream px-3 text-sm font-normal text-palette-deep outline-none focus:border-palette-gold focus:ring-2 focus:ring-palette-gold/40 disabled:opacity-60"
             >
+              <option value="">Select category</option>
               {availableCategories.map((category) => (
                 <option key={category} value={category}>{category}</option>
               ))}
@@ -264,7 +261,7 @@ export function TopicSearch({ approvedCatalog, databaseRelease = false }: {
                 setSelectedTopicId(event.target.value);
                 setSearchedTopicId("");
               }}
-              disabled={!selectedEntry}
+              disabled={!selectedCategory || !selectedEntry}
               className="mt-1.5 h-11 w-full rounded-lg border border-palette-green/20 bg-palette-cream px-3 text-sm font-normal text-palette-deep outline-none focus:border-palette-gold focus:ring-2 focus:ring-palette-gold/40 disabled:opacity-60"
             >
               <option value="">Choose a topic</option>
