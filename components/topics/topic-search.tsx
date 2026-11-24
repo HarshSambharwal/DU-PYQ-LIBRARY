@@ -58,7 +58,7 @@ function QuestionResults({ groups, grouped, topicId, suggested = false }: {
               });
               return (
                 <li key={question.id} className="py-2 first:pt-0 last:pb-0">
-                  {suggested && <p className="mb-1 text-xs font-semibold text-palette-gold">AI-suggested related question</p>}
+                  {suggested && <p className="mb-1 text-xs font-semibold text-palette-gold">AI-suggested</p>}
                   <p className="whitespace-pre-line break-words text-sm leading-6 text-palette-cream">{question.text}</p>
                   {parts.length > 0 && (
                     <div className="mt-2 text-xs text-palette-cream/75">
@@ -134,13 +134,6 @@ export function TopicSearch({ approvedCatalog, databaseRelease = false }: {
     topic.id, suggestedTopicQuestions(selectedEntry, topic.id),
   ]) : []), [selectedEntry]);
   const related = groupQuestionsByPaper(suggestedByTopic.get(searchedTopicId) ?? []);
-
-  const reviewCount = selectedEntry && searchedTopicId
-    ? selectedEntry.questions.filter((question) =>
-      question.topicIds.includes(searchedTopicId)
-      && (question.mappingStatus !== "verified" || question.ocrStatus !== "extracted"),
-    ).length
-    : 0;
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -268,18 +261,14 @@ export function TopicSearch({ approvedCatalog, databaseRelease = false }: {
               {selectedEntry && Array.from(new Set(selectedEntry.topics.map((topic) => topic.unit))).map((unit) => (
                 <optgroup key={unit} label={unit}>
                   {selectedEntry.topics.filter((topic) => topic.unit === unit).map((topic) => {
-                    const topicQuestions = selectedEntry.questions.filter((question) => question.topicIds.includes(topic.id));
                     const verifiedCount = verifiedByTopic.get(topic.id)?.length ?? 0;
-                    const reviewQuestions = topicQuestions.filter((question) =>
-                      question.mappingStatus !== "verified" || question.ocrStatus !== "extracted",
-                    ).length;
                     const suggestedCount = suggestedByTopic.get(topic.id)?.length ?? 0;
-                    const availability = verifiedCount > 0
-                      ? `${verifiedCount} verified ${verifiedCount === 1 ? "question" : "questions"}`
-                      : reviewQuestions > 0 ? "Review pending" : "No verified matches";
-                    const relatedLabel = suggestedCount > 0 ? ` · ${suggestedCount} AI-suggested` : "";
+                    const counts = [
+                      verifiedCount > 0 ? `${verifiedCount} verified` : "",
+                      suggestedCount > 0 ? `${suggestedCount} AI-suggested` : "",
+                    ].filter(Boolean).join(" · ");
 
-                    return <option key={topic.id} value={topic.id}>{topic.label} · {availability}{relatedLabel}</option>;
+                    return <option key={topic.id} value={topic.id}>{topic.label} · {counts || "No matches yet"}</option>;
                   })}
                 </optgroup>
               ))}
@@ -296,61 +285,43 @@ export function TopicSearch({ approvedCatalog, databaseRelease = false }: {
         </form>
 
         {searchedTopicId && selectedTopic && selectedEntry && (
-          <div className="mt-4 border-t border-white/15 pt-4" aria-live="polite">
-            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-              <div>
-                <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-palette-gold/80">
-                  {selectedEntry.semesterLabel} · {selectedEntry.subjectName} · {selectedEntry.category} · {selectedTopic.unit}
-                </p>
-                <h3 className="mt-0.5 font-serif text-lg font-semibold">{selectedTopic.label}</h3>
-              </div>
-              <span className="text-xs text-palette-cream/65">
-                {questionsForTopic.length} verified {questionsForTopic.length === 1 ? "question" : "questions"}
-              </span>
+          <div className="mt-4 space-y-3 border-t border-white/15 pt-4" aria-live="polite">
+            <div>
+              <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-palette-gold/80">
+                {selectedEntry.semesterLabel} · {selectedEntry.subjectName} · {selectedEntry.category} · {selectedTopic.unit}
+              </p>
+              <h3 className="mt-0.5 font-serif text-lg font-semibold">{selectedTopic.label}</h3>
             </div>
 
-            <section aria-labelledby="topic-search-verified-heading" data-topic-tier="verified" className="space-y-2">
-              <h4 id="topic-search-verified-heading" className="text-sm font-semibold">Verified topic matches</h4>
-              {questionsForTopic.length > 0 ? (
+            {questionsForTopic.length > 0 && (
+              <section aria-labelledby="topic-search-verified-heading" data-topic-tier="verified" className="space-y-2">
+                <h4 id="topic-search-verified-heading" className="text-sm font-semibold">Verified topic matches</h4>
                 <QuestionResults groups={groups} grouped={usingApproved} topicId={searchedTopicId} />
-              ) : (
-                <div className="rounded-lg border border-white/15 bg-palette-deep/25 p-3 text-sm text-palette-cream/75">
-                  <p>No verified questions found for this topic yet.</p>
-                  {selectedEntry.candidateQuestionCount > 0 && (
-                    <p className="mt-1 text-xs text-palette-cream/60">
-                      The extraction audit recorded {selectedEntry.candidateQuestionCount} candidate blocks for this paper group.
-                      Those blocks are still outside verified results.
-                    </p>
-                  )}
-                </div>
-              )}
-            </section>
-
-            {selectedEntry.suggestions !== undefined && (
-              <section aria-labelledby="topic-search-suggestions-heading" data-topic-tier="suggested"
-                className="mt-4 space-y-2 rounded-xl border border-palette-gold/40 bg-palette-gold/5 p-3 sm:p-4">
-                <h4 id="topic-search-suggestions-heading" className="text-sm font-semibold text-palette-gold">
-                  AI-suggested related questions
-                </h4>
-                <p className="text-xs leading-5 text-palette-cream/75">
-                  These suggestions come from the original papers and may help with revision. They still await academic approval.
-                </p>
-                {related.length > 0 ? (
-                  <QuestionResults groups={related} grouped topicId={searchedTopicId} suggested />
-                ) : (
-                  <p className="text-sm text-palette-cream/75">No AI-suggested questions are available for this topic yet.</p>
-                )}
               </section>
             )}
 
-            {reviewCount > 0 && (
-              <p className="mt-2 text-xs leading-5 text-palette-gold/90">
-                {reviewCount} candidate {reviewCount === 1 ? "question is" : "questions are"} awaiting OCR review and is not included in verified results.
-              </p>
+            {related.length > 0 && (
+              <section aria-labelledby="topic-search-suggestions-heading" data-topic-tier="suggested"
+                className="space-y-2 rounded-xl border border-palette-gold/40 bg-palette-gold/5 p-3 sm:p-4">
+                <h4 id="topic-search-suggestions-heading" className="text-sm font-semibold text-palette-gold">
+                  Questions for This Topic
+                </h4>
+                <p className="text-xs leading-5 text-palette-cream/75">
+                  AI-matched to the syllabus. Check the original paper for accuracy.
+                </p>
+                <QuestionResults groups={related} grouped topicId={searchedTopicId} suggested />
+              </section>
+            )}
+
+            {questionsForTopic.length === 0 && related.length === 0 && (
+              <div className="rounded-lg border border-white/15 bg-palette-deep/25 p-3 text-sm text-palette-cream/75">
+                <p>No matches yet. We’re still adding topic matches, so a relevant question may be in the original papers.</p>
+                {selectedEntry.coverage?.length ? <p className="mt-1">Open Other Questions below to browse by paper.</p> : null}
+              </div>
             )}
           </div>
         )}
-        {selectedEntry && <QuestionCoverage entry={selectedEntry} />}
+        {selectedEntry && <QuestionCoverage key={`${selectedEntry.key}:${searchedTopicId}`} entry={selectedEntry} />}
       </div>
     </section>
   );

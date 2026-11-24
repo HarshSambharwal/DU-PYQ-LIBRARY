@@ -19,13 +19,14 @@ function Pages({ paper, pages }: { paper: CoveragePaper; pages: readonly number[
 export function QuestionCoverage({ entry }: { entry: SearchEntry }) {
   if (!entry.coverage?.length) return null;
   return (
-    <section data-topic-tier="coverage" aria-labelledby="exam-coverage-heading" className="mt-4 rounded-xl border border-white/20 p-3 sm:p-4">
-      <h4 id="exam-coverage-heading" className="text-sm font-semibold">Browse questions by paper</h4>
-      <p className="mt-1 text-xs leading-5 text-palette-cream/75">
-        Unclassified questions are available here while their topics are reviewed.
-        Open any original PDF page for questions, diagrams or tables that still need an extraction check.
+    <details data-topic-tier="coverage" className="mt-4 rounded-xl border border-white/20">
+      <summary className="min-h-11 cursor-pointer break-words rounded-xl px-3 py-3 text-sm font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-palette-gold sm:px-4">
+        Other Questions — Topic Not Assigned
+      </summary>
+      <p className="px-3 text-xs leading-5 text-palette-cream/75 sm:px-4">
+        These questions may or may not relate to the selected topic. Their syllabus topics have not been assigned yet.
       </p>
-      <div className="mt-3 grid gap-2">
+      <div className="mt-3 grid gap-2 px-3 pb-3 sm:px-4 sm:pb-4">
         {entry.coverage.map((paper) => {
           const readable = paper.records.filter((record) => record.status === "unclassified");
           const original = paper.records.filter((record) => record.status === "original_region");
@@ -41,7 +42,7 @@ export function QuestionCoverage({ entry }: { entry: SearchEntry }) {
                 </div>
                 {readable.length > 0 && (
                   <div>
-                    <h5 className="text-sm font-semibold">Unclassified · needs topic review</h5>
+                    <h5 className="text-sm font-semibold">Questions without a topic</h5>
                     <ul className="mt-2 divide-y divide-white/15">
                       {readable.map((record) => (
                         <li key={record.id} className="space-y-1 py-2">
@@ -80,6 +81,6 @@ export function QuestionCoverage({ entry }: { entry: SearchEntry }) {
           );
         })}
       </div>
-    </section>
+    </details>
   );
 }
