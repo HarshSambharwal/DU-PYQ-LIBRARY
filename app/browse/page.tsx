@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
@@ -20,26 +19,30 @@ export default async function BrowsePage({
   searchParams: Promise<BrowseSearchParams>;
 }) {
   const resolvedSearchParams = await searchParams;
-  const { courses, semesters, filters } = await getBrowseFilters();
-
   const selectedFilter = BROWSE_FILTERS.find(
     (filter) => filter.value === resolvedSearchParams.filter
   );
 
-  const { papers, paperCount, semesterMap } = await getPapers({
-    courseId: resolvedSearchParams.course
-      ? Number(resolvedSearchParams.course)
-      : undefined,
-    semesterId: resolvedSearchParams.semester
-      ? Number(resolvedSearchParams.semester)
-      : undefined,
-    browseFilter: selectedFilter?.value,
-  });
+  // These independent data requests run concurrently instead of sequentially.
+  const [browseFilters, browseResult] = await Promise.all([
+    getBrowseFilters(),
+    getPapers({
+      courseId: resolvedSearchParams.course
+        ? Number(resolvedSearchParams.course)
+        : undefined,
+      semesterId: resolvedSearchParams.semester
+        ? Number(resolvedSearchParams.semester)
+        : undefined,
+      browseFilter: selectedFilter?.value,
+    }),
+  ]);
 
+  const { courses, semesters, filters } = browseFilters;
+  const { papers, paperCount, semesterMap } = browseResult;
   const hasActiveSearch = Boolean(
     resolvedSearchParams.course ||
-    resolvedSearchParams.semester ||
-    selectedFilter
+      resolvedSearchParams.semester ||
+      selectedFilter
   );
 
   return (
