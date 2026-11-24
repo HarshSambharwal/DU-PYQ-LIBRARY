@@ -362,9 +362,10 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
       </div>
 
       {shareFeedback === "error" && (
-        <p role="status" className="px-4 py-2 text-sm text-palette-earth dark:text-palette-cream">
-          Couldn't copy the link automatically. Please copy this page's URL from your browser's address bar.
-        </p>
+        
+<p role="status" className="px-4 py-2 text-sm text-palette-earth dark:text-palette-cream">
+  Could not copy the link automatically. Please copy the page URL from your browser address bar.
+</p>
       )}
 
       <div ref={containerRef} className="max-h-[78vh] overflow-auto p-3 sm:p-4">
