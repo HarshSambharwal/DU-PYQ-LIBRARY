@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { AnimatedSection } from "@/components/ui/animated-section";
@@ -6,6 +7,24 @@ import { PaperCard } from "@/components/papers/paper-card";
 import { BROWSE_FILTERS, getBrowseFilters, getPapers } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Browse DU Previous Year Question Papers | DU PYQ Hub",
+  description:
+    "Browse Delhi University previous year question papers by course, semester and subject. Find available BSc Life Sciences, Botany, Zoology, Chemistry and other DU PYQs.",
+  alternates: {
+    canonical: "https://du-pyq-library.vercel.app/browse",
+  },
+  openGraph: {
+    title: "Browse DU Previous Year Question Papers | DU PYQ Hub",
+    description:
+      "Explore Delhi University previous year papers by course, semester and subject on DU PYQ Hub.",
+    url: "https://du-pyq-library.vercel.app/browse",
+    siteName: "DU PYQ Hub",
+    type: "website",
+    locale: "en_IN",
+  },
+};
 
 type BrowseSearchParams = {
   course?: string;

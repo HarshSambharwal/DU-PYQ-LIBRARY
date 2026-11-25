@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -13,6 +14,24 @@ import { readApprovedTopicSearch, readLocalExamCoverage, readSupabaseTopicSearch
 import { BROWSE_FILTERS, getHomeData, type BrowseFilterValue } from "@/lib/supabase/queries";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "DU Previous Year Question Papers | DU PYQ Hub",
+  description:
+    "Find Delhi University previous year question papers for BSc Life Sciences and other available courses. Browse semester-wise PYQs, search by topic, download and share PDFs.",
+  alternates: {
+    canonical: "https://du-pyq-library.vercel.app/",
+  },
+  openGraph: {
+    title: "DU Previous Year Question Papers | DU PYQ Hub",
+    description:
+      "Explore Delhi University previous year question papers, including BSc Life Sciences PYQs. Browse by semester and subject, search by topic, download and share papers.",
+    url: "https://du-pyq-library.vercel.app/",
+    siteName: "DU PYQ Hub",
+    type: "website",
+    locale: "en_IN",
+  },
+};
 
 const subjectAccents = [
   "bg-palette-green text-palette-cream",
