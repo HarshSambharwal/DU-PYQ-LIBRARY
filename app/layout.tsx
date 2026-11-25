@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
@@ -6,11 +7,31 @@ import { Footer } from "@/components/layout/footer";
 import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
-  title: "DU PYQ HUB",
-  description: "Delhi University Previous Year Question Papers platform.",
-  other: {
-  "google-site-verification": "-sIDktU5fq2gaj6tGxuIfjYkR4reMQeh8qmQDbNx4Hk",
-},
+  metadataBase: new URL("https://du-pyq-library.vercel.app"),
+
+  title: "DU Previous Year Question Papers | DU PYQ Hub",
+
+  description:
+    "Find Delhi University previous year question papers for BSc Life Sciences and other available courses. Browse semester-wise PYQs, search by topic, download and share PDFs.",
+
+  openGraph: {
+    title: "DU Previous Year Question Papers | DU PYQ Hub",
+    description:
+      "Explore Delhi University previous year question papers, including BSc Life Sciences PYQs. Browse by semester and subject, search by topic, download and share papers.",
+    url: "https://du-pyq-library.vercel.app/",
+    siteName: "DU PYQ Hub",
+    type: "website",
+    locale: "en_IN",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+  },
+
+  verification: {
+    google: "-sIDktU5fq2gaj6tGxuIfjYkR4reMQeh8qmQDbNx4Hk",
+  },
 };
 
 export default function RootLayout({
